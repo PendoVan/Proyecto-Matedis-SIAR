@@ -5,6 +5,7 @@ Descripción: Genera un grafo de demostración con datos realistas de la región
 
 import sys
 import os
+sys.stdout.reconfigure(encoding='utf-8')
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.unidad3_grafos.grafo_rutas import GrafoRutas, TipoCamino

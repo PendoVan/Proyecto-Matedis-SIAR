@@ -10,7 +10,7 @@ import sys
 import os
 from datetime import datetime
 from typing import List
-
+sys.stdout.reconfigure(encoding='utf-8')
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.unidad3_grafos.grafo_rutas import GrafoRutas, TipoCamino

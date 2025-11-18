@@ -1,12 +1,12 @@
 {
   "nodos": [
-    "Quinua",
-    "Tambo",
-    "Huamanga",
-    "San Miguel",
     "Sivia",
-    "Ayacucho",
-    "Huanta"
+    "San Miguel",
+    "Tambo",
+    "Quinua",
+    "Huanta",
+    "Huamanga",
+    "Ayacucho"
   ],
   "aristas": [
     {
