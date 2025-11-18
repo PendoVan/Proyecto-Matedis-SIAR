@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIAR - Sistema de Información y Alerta Resiliente</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            border: none;
+            background: none;
+            font-size: 1em;
+        }
+
+        .tab:hover {
+            background: #e0e0e0;
+        }
+
+        .tab.active {
+            background: white;
+            border-bottom: 3px solid #667eea;
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .result h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .route-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .info-item {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .info-item .label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .info-item .value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .route-path {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        .alert-item {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .alert-item.confirmada {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .alert-item.resuelta {
+            background: #e0e0e0;
+            border-left-color: #6c757d;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .alert-id {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .confidence-bar {
+            background: #e0e0e0;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .confidence-fill {
+            background: linear-gradient(90deg, #ffc107, #28a745);
+            height: 100%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌾 SIAR</h1>
+            <p>Sistema de Información y Alerta Resiliente para Cooperativas Agrícolas</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('rutas')">🗺️ Rutas</button>
+            <button class="tab" onclick="switchTab('alertas')">🚨 Alertas</button>
+            <button class="tab" onclick="switchTab('logistica')">📦 Logística</button>
+        </div>
+
+        <!-- TAB: RUTAS -->
+        <div id="rutas" class="tab-content active">
+            <div class="card">
+                <h3>Calcular Ruta Óptima</h3>
+                <div class="form-group">
+                    <label>Origen:</label>
+                    <select id="origen">
+                        <option value="">Cargando nodos...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Destino:</label>
+                    <select id="destino">
+                        <option value="">Cargando nodos...</option>
+                    </select>
+                </div>
+                <button onclick="calcularRuta()">Calcular Ruta</button>
+                <button onclick="compararRutas()" style="margin-left: 10px;">Comparar Criterios</button>
+            </div>
+
+            <div id="resultado-ruta"></div>
+        </div>
+
+        <!-- TAB: ALERTAS -->
+        <div id="alertas" class="tab-content">
+            <div class="card">
+                <h3>Crear Nueva Alerta</h3>
+                <div class="form-group">
+                    <label>Tipo de Alerta:</label>
+                    <select id="tipo-alerta">
+                        <option value="bloqueo_carretera">Bloqueo de Carretera</option>
+                        <option value="lluvia_intensa">Lluvia Intensa</option>
+                        <option value="derrumbe">Derrumbe</option>
+                        <option value="emergencia_medica">Emergencia Médica</option>
+                        <option value="inundacion">Inundación</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ubicación:</label>
+                    <input type="text" id="ubicacion-alerta" placeholder="Ej: Ruta Huanta-Sivia Km 32">
+                </div>
+                <div class="form-group">
+                    <label>Descripción:</label>
+                    <textarea id="descripcion-alerta" placeholder="Describe la situación..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tu ID de Usuario:</label>
+                    <input type="text" id="emisor-alerta" placeholder="Ej: AGR-042">
+                </div>
+                <button onclick="crearAlerta()">Enviar Alerta</button>
+            </div>
+
+            <div class="card">
+                <h3>Alertas Activas</h3>
+                <button onclick="cargarAlertas()">🔄 Actualizar</button>
+                <div id="lista-alertas" style="margin-top: 20px;">
+                    <p class="loading">Cargando alertas...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: LOGÍSTICA -->
+        <div id="logistica" class="tab-content">
+            <div class="card">
+                <h3>Registrar Nuevo Lote</h3>
+                <div class="form-group">
+                    <label>Producto:</label>
+                    <select id="producto-lote">
+                        <option value="quinua">Quinua</option>
+                        <option value="papa">Papa</option>
+                        <option value="cafe">Café</option>
+                        <option value="maiz">Maíz</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad (kg):</label>
+                    <input type="number" id="cantidad-lote" placeholder="500" min="1">
+                </div>
+                <div class="form-group">
+                    <label>ID Agricultor:</label>
+                    <input type="text" id="agricultor-lote" placeholder="AGR-042">
+                </div>
+                <button onclick="crearLote()">Registrar Lote</button>
+            </div>
+
+            <div id="resultado-lote"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        // Cargar nodos al iniciar
+        async function cargarNodos() {
+            try {
+                const response = await fetch(`${API_BASE}/grafos/nodos`);
+                const nodos = await response.json();
+                
+                const origenSelect = document.getElementById('origen');
+                const destinoSelect = document.getElementById('destino');
+                
+                origenSelect.innerHTML = '';
+                destinoSelect.innerHTML = '';
+                
+                nodos.forEach(nodo => {
+                    origenSelect.innerHTML += `<option value="${nodo}">${nodo}</option>`;
+                    destinoSelect.innerHTML += `<option value="${nodo}">${nodo}</option>`;
+                });
+            } catch (error) {
+                console.error('Error cargando nodos:', error);
+            }
+        }
+
+        // Calcular ruta
+        async function calcularRuta() {
+            const origen = document.getElementById('origen').value;
+            const destino = document.getElementById('destino').value;
+            
+            if (!origen || !destino) {
+                alert('Selecciona origen y destino');
+                return;
+            }
+
+            const resultado = document.getElementById('resultado-ruta');
+            resultado.innerHTML = '<p class="loading">Calculando ruta...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE}/rutas/calcular?origen=${origen}&destino=${destino}`);
+                const ruta = await response.json();
+
+                resultado.innerHTML = `
+                    <div class="result">
+                        <h4>🎯 Ruta Más Fiable</h4>
+                        <div class="route-path">
+                            ${ruta.nodos.join(' → ')}
+                        </div>
+                        <div class="route-info">
+                            <div class="info-item">
+                                <div class="label">Distancia</div>
+                                <div class="value">${ruta.distancia_km.toFixed(1)} km</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="label">Fiabilidad</div>
+                                <div class="value">${(ruta.fiabilidad * 100).toFixed(1)}%</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="label">Tiempo</div>
+                                <div class="value">${ruta.tiempo_min} min</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="label">Costo (peso)</div>
+                                <div class="value">${ruta.peso.toFixed(1)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                resultado.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Comparar rutas
+        async function compararRutas() {
+            const origen = document.getElementById('origen').value;
+            const destino = document.getElementById('destino').value;
+            
+            if (!origen || !destino) return;
+
+            const resultado = document.getElementById('resultado-ruta');
+            resultado.innerHTML = '<p class="loading">Comparando criterios...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE}/rutas/comparar?origen=${origen}&destino=${destino}`);
+                const comp = await response.json();
+
+                resultado.innerHTML = `
+                    <div class="result">
+                        <h4>📊 Comparación de Criterios</h4>
+                        
+                        <h5 style="margin-top: 20px;">1️⃣ Ruta Más Fiable</h5>
+                        <div class="route-path">${comp.mas_fiable.nodos.join(' → ')}</div>
+                        <div class="route-info">
+                            <div class="info-item"><div class="label">Distancia</div><div class="value">${comp.mas_fiable.distancia_km.toFixed(1)} km</div></div>
+                            <div class="info-item"><div class="label">Fiabilidad</div><div class="value">${(comp.mas_fiable.fiabilidad * 100).toFixed(1)}%</div></div>
+                            <div class="info-item"><div class="label">Tiempo</div><div class="value">${comp.mas_fiable.tiempo_min} min</div></div>
+                        </div>
+
+                        <h5 style="margin-top: 20px;">2️⃣ Ruta Más Corta</h5>
+                        <div class="route-path">${comp.mas_corta.nodos.join(' → ')}</div>
+                        <div class="route-info">
+                            <div class="info-item"><div class="label">Distancia</div><div class="value">${comp.mas_corta.distancia_km.toFixed(1)} km</div></div>
+                            <div class="info-item"><div class="label">Fiabilidad</div><div class="value">${(comp.mas_corta.fiabilidad * 100).toFixed(1)}%</div></div>
+                            <div class="info-item"><div class="label">Tiempo</div><div class="value">${comp.mas_corta.tiempo_min} min</div></div>
+                        </div>
+
+                        <h5 style="margin-top: 20px;">3️⃣ Ruta Más Rápida</h5>
+                        <div class="route-path">${comp.mas_rapida.nodos.join(' → ')}</div>
+                        <div class="route-info">
+                            <div class="info-item"><div class="label">Distancia</div><div class="value">${comp.mas_rapida.distancia_km.toFixed(1)} km</div></div>
+                            <div class="info-item"><div class="label">Fiabilidad</div><div class="value">${(comp.mas_rapida.fiabilidad * 100).toFixed(1)}%</div></div>
+                            <div class="info-item"><div class="label">Tiempo</div><div class="value">${comp.mas_rapida.tiempo_min} min</div></div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                resultado.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Crear alerta
+        async function crearAlerta() {
+            const tipo = document.getElementById('tipo-alerta').value;
+            const ubicacion = document.getElementById('ubicacion-alerta').value;
+            const descripcion = document.getElementById('descripcion-alerta').value;
+            const emisor = document.getElementById('emisor-alerta').value;
+
+            if (!ubicacion || !descripcion || !emisor) {
+                alert('Completa todos los campos');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/alertas/crear`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tipo, ubicacion, descripcion, emisor })
+                });
+
+                const alerta = await response.json();
+                
+                alert(`✅ Alerta creada: ${alerta.id}`);
+                document.getElementById('ubicacion-alerta').value = '';
+                document.getElementById('descripcion-alerta').value = '';
+                cargarAlertas();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // Cargar alertas
+        async function cargarAlertas() {
+            const lista = document.getElementById('lista-alertas');
+            lista.innerHTML = '<p class="loading">Cargando...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE}/alertas/activas`);
+                const alertas = await response.json();
+
+                if (alertas.length === 0) {
+                    lista.innerHTML = '<p>No hay alertas activas</p>';
+                    return;
+                }
+
+                lista.innerHTML = alertas.map(a => `
+                    <div class="alert-item ${a.estado}">
+                        <div class="alert-header">
+                            <span class="alert-id">${a.id}</span>
+                            <span>${a.estado}</span>
+                        </div>
+                        <strong>${a.tipo}</strong> - ${a.ubicacion}
+                        <p>${a.descripcion}</p>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${a.nivel_confianza * 100}%">
+                                ${(a.nivel_confianza * 100).toFixed(0)}% confianza
+                            </div>
+                        </div>
+                        <small>Confirmaciones: ${a.confirmaciones}</small>
+                    </div>
+                `).join('');
+            } catch (error) {
+                lista.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Crear lote
+        async function crearLote() {
+            const producto = document.getElementById('producto-lote').value;
+            const cantidad_kg = parseFloat(document.getElementById('cantidad-lote').value);
+            const agricultor_id = document.getElementById('agricultor-lote').value;
+
+            if (!cantidad_kg || !agricultor_id) {
+                alert('Completa todos los campos');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/lotes/crear`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ producto, cantidad_kg, agricultor_id })
+                });
+
+                const lote = await response.json();
+                
+                document.getElementById('resultado-lote').innerHTML = `
+                    <div class="success">
+                        ✅ Lote registrado exitosamente
+                        <br><strong>ID:</strong> ${lote.id}
+                        <br><strong>Producto:</strong> ${lote.producto}
+                        <br><strong>Cantidad:</strong> ${lote.cantidad_kg} kg
+                        <br><strong>Estado:</strong> ${lote.estado}
+                    </div>
+                `;
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // Cambiar tab
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+
+            if (tabName === 'alertas') {
+                cargarAlertas();
+            }
+        }
+
+        // Inicializar
+        window.onload = () => {
+            cargarNodos();
+            cargarAlertas();
+        };
+    </script>
+</body>
+</html>
