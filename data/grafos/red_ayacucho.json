@@ -1,0 +1,46 @@
+{
+  "nodos": [
+    "Huanta",
+    "San Miguel",
+    "Sivia",
+    "Ayacucho"
+  ],
+  "aristas": [
+    {
+      "origen": "Ayacucho",
+      "destino": "Huanta",
+      "distancia_km": 47,
+      "fiabilidad": 0.95,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.1,
+      "tiempo_estimado_min": 47
+    },
+    {
+      "origen": "Ayacucho",
+      "destino": "San Miguel",
+      "distancia_km": 135,
+      "fiabilidad": 0.85,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.2,
+      "tiempo_estimado_min": 202
+    },
+    {
+      "origen": "Huanta",
+      "destino": "Sivia",
+      "distancia_km": 85,
+      "fiabilidad": 0.7,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.4,
+      "tiempo_estimado_min": 127
+    },
+    {
+      "origen": "Sivia",
+      "destino": "San Miguel",
+      "distancia_km": 95,
+      "fiabilidad": 0.8,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 228
+    }
+  ]
+}

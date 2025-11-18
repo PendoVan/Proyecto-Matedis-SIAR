@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# Jupyter
+.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+
+# Datos sensibles (si usan datos reales)
+data/raw/*.csv
+!data/raw/senamhi_sample.csv  # Permitir solo el ejemplo
+
+# OS
+.DS_Store
+Thumbs.db
