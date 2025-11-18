@@ -1,9 +1,12 @@
 {
   "nodos": [
-    "Huanta",
+    "Quinua",
+    "Tambo",
+    "Huamanga",
     "San Miguel",
     "Sivia",
-    "Ayacucho"
+    "Ayacucho",
+    "Huanta"
   ],
   "aristas": [
     {
@@ -17,12 +20,30 @@
     },
     {
       "origen": "Ayacucho",
+      "destino": "Quinua",
+      "distancia_km": 37,
+      "fiabilidad": 0.9,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.15,
+      "tiempo_estimado_min": 37
+    },
+    {
+      "origen": "Ayacucho",
       "destino": "San Miguel",
       "distancia_km": 135,
       "fiabilidad": 0.85,
       "tipo_camino": "afirmado",
-      "riesgo_historico": 0.2,
+      "riesgo_historico": 0.25,
       "tiempo_estimado_min": 202
+    },
+    {
+      "origen": "Ayacucho",
+      "destino": "Tambo",
+      "distancia_km": 95,
+      "fiabilidad": 0.8,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 142
     },
     {
       "origen": "Huanta",
@@ -30,17 +51,44 @@
       "distancia_km": 85,
       "fiabilidad": 0.7,
       "tipo_camino": "afirmado",
-      "riesgo_historico": 0.4,
+      "riesgo_historico": 0.45,
       "tiempo_estimado_min": 127
     },
     {
-      "origen": "Sivia",
-      "destino": "San Miguel",
-      "distancia_km": 95,
+      "origen": "Huanta",
+      "destino": "Tambo",
+      "distancia_km": 60,
+      "fiabilidad": 0.75,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.35,
+      "tiempo_estimado_min": 90
+    },
+    {
+      "origen": "San Miguel",
+      "destino": "Tambo",
+      "distancia_km": 45,
       "fiabilidad": 0.8,
       "tipo_camino": "trocha",
       "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 108
+    },
+    {
+      "origen": "San Miguel",
+      "destino": "Sivia",
+      "distancia_km": 95,
+      "fiabilidad": 0.75,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.4,
       "tiempo_estimado_min": 228
+    },
+    {
+      "origen": "Tambo",
+      "destino": "Quinua",
+      "distancia_km": 70,
+      "fiabilidad": 0.65,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.5,
+      "tiempo_estimado_min": 168
     }
   ]
 }

@@ -5,12 +5,10 @@ Descripción: Genera un grafo de demostración con datos realistas de la región
 
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-try:
-    from ..src.unidad3_grafos.grafo_rutas import GrafoRutas, TipoCamino
-except ImportError:
-    from ..src.unidad3_grafos.grafo_rutas import GrafoRutas, TipoCamino
+from src.unidad3_grafos.grafo_rutas import GrafoRutas, TipoCamino
+
 
 def crear_grafo_ayacucho() -> GrafoRutas:
     """
