@@ -1,0 +1,150 @@
+{
+  "nodos": [
+    "San Martín",
+    "Ayacucho",
+    "Puno",
+    "Lima",
+    "Junín",
+    "Arequipa",
+    "Amazonas",
+    "Cusco",
+    "Cajamarca"
+  ],
+  "aristas": [
+    {
+      "origen": "Lima",
+      "destino": "Arequipa",
+      "distancia_km": 1010,
+      "fiabilidad": 0.92,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.08,
+      "tiempo_estimado_min": 1009
+    },
+    {
+      "origen": "Lima",
+      "destino": "Junín",
+      "distancia_km": 305,
+      "fiabilidad": 0.85,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.18,
+      "tiempo_estimado_min": 305
+    },
+    {
+      "origen": "Lima",
+      "destino": "Ayacucho",
+      "distancia_km": 565,
+      "fiabilidad": 0.82,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.22,
+      "tiempo_estimado_min": 847
+    },
+    {
+      "origen": "Lima",
+      "destino": "Cajamarca",
+      "distancia_km": 865,
+      "fiabilidad": 0.83,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.2,
+      "tiempo_estimado_min": 865
+    },
+    {
+      "origen": "Cusco",
+      "destino": "Junín",
+      "distancia_km": 595,
+      "fiabilidad": 0.78,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.28,
+      "tiempo_estimado_min": 892
+    },
+    {
+      "origen": "Cusco",
+      "destino": "Ayacucho",
+      "distancia_km": 590,
+      "fiabilidad": 0.75,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 885
+    },
+    {
+      "origen": "Cusco",
+      "destino": "Puno",
+      "distancia_km": 389,
+      "fiabilidad": 0.9,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.12,
+      "tiempo_estimado_min": 389
+    },
+    {
+      "origen": "Cusco",
+      "destino": "Arequipa",
+      "distancia_km": 510,
+      "fiabilidad": 0.86,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.16,
+      "tiempo_estimado_min": 510
+    },
+    {
+      "origen": "Arequipa",
+      "destino": "Puno",
+      "distancia_km": 295,
+      "fiabilidad": 0.88,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.15,
+      "tiempo_estimado_min": 295
+    },
+    {
+      "origen": "Puno",
+      "destino": "Ayacucho",
+      "distancia_km": 680,
+      "fiabilidad": 0.72,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.32,
+      "tiempo_estimado_min": 1020
+    },
+    {
+      "origen": "Ayacucho",
+      "destino": "Junín",
+      "distancia_km": 255,
+      "fiabilidad": 0.8,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.25,
+      "tiempo_estimado_min": 382
+    },
+    {
+      "origen": "Junín",
+      "destino": "San Martín",
+      "distancia_km": 485,
+      "fiabilidad": 0.7,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.35,
+      "tiempo_estimado_min": 1164
+    },
+    {
+      "origen": "Cajamarca",
+      "destino": "Amazonas",
+      "distancia_km": 318,
+      "fiabilidad": 0.7,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.35,
+      "tiempo_estimado_min": 477
+    },
+    {
+      "origen": "Cajamarca",
+      "destino": "San Martín",
+      "distancia_km": 520,
+      "fiabilidad": 0.68,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.38,
+      "tiempo_estimado_min": 780
+    },
+    {
+      "origen": "San Martín",
+      "destino": "Amazonas",
+      "distancia_km": 420,
+      "fiabilidad": 0.65,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.42,
+      "tiempo_estimado_min": 1008
+    }
+  ]
+}

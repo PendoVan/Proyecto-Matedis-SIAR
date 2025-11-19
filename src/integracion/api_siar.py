@@ -1,59 +1,46 @@
 """
-Módulo: api_siar.py
-Descripción: API REST con FastAPI para el Sistema SIAR.
-Expone endpoints para gestión de rutas, alertas y logística.
+Módulo: api_siar_final.py
+Descripción: API REST completa para SIAR con 9 departamentos del Perú.
+Incluye: Rutas, Alertas, Predicción Climática, Árbol de Decisión
 
-Ejecutar: uvicorn src.integracion.api_siar:app --reload
-Acceder: http://localhost:8000/docs
+Ejecutar: python -m uvicorn src.integracion.api_siar_final:app --reload
 """
 
-from fastapi import FastAPI, HTTPException # type: ignore
-from fastapi.middleware.cors import CORSMiddleware # type: ignore
-from pydantic import BaseModel # type: ignore
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from typing import List, Optional, Dict
 from datetime import datetime
 import sys
 import os
+import json
 
-# Agregar src al path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from src.unidad3_grafos.grafo_rutas import GrafoRutas, TipoCamino
 from src.unidad3_grafos.algoritmo_fiabilidad import AlgoritmoFiabilidad, Ruta
 from src.unidad3_grafos.maquina_estados import (
-    MaquinaEstadosAlerta,
-    MaquinaEstadosLogistica,
-    Alerta,
-    LoteCosecha,
-    EstadoAlerta,
-    EstadoLote,
-    EventoAlerta,
-    EventoLote
+    MaquinaEstadosAlerta, MaquinaEstadosLogistica,
+    Alerta, LoteCosecha, EstadoAlerta, EstadoLote,
+    EventoAlerta, EventoLote
 )
 
-# En tu API o demo
-from src.unidad3_grafos.osm_rutas_peru import IntegradorOSM
-from src.unidad3_grafos.prediccion_climatica import IntegradorSENAMHI
+# Intentar importar red neuronal
+try:
+    from src.unidad3_grafos.red_neuronal_simple import RedNeuronalSimple
+    RED_NEURONAL_DISPONIBLE = True
+except:
+    RED_NEURONAL_DISPONIBLE = False
 
-# Obtener rutas reales
-osm = IntegradorOSM()
-grafo = osm.descargar_region("Ayacucho, Peru")
+# Intentar importar árbol de decisión
+try:
+    from src.unidad3_grafos.arbol_decision_rutas import ClasificadorRutas
+    ARBOL_DISPONIBLE = True
+except:
+    ARBOL_DISPONIBLE = False
 
-# Predecir riesgo climático
-clima = IntegradorSENAMHI()
-riesgo = clima.predecir_riesgo(temp=15, precip=30, hum=90, pres=1008, viento=10)
-
-# Ajustar fiabilidad de rutas según clima
-grafo.actualizar_fiabilidad("Huanta", "Sivia", riesgo.fiabilidad_ajustada)
 
 # ========== MODELOS PYDANTIC ==========
-
-class NodoInfo(BaseModel):
-    nombre: str
-    tipo: Optional[str] = None
-    poblacion: Optional[int] = None
-    altitud: Optional[int] = None
-
 
 class RutaResponse(BaseModel):
     nodos: List[str]
@@ -61,12 +48,28 @@ class RutaResponse(BaseModel):
     fiabilidad: float
     tiempo_min: int
     peso: float
+    clasificacion: Optional[str] = None
 
 
 class ComparacionRutasResponse(BaseModel):
     mas_fiable: RutaResponse
     mas_corta: RutaResponse
     mas_rapida: RutaResponse
+
+
+class PrediccionClima(BaseModel):
+    temperatura: float
+    precipitacion: float
+    humedad: float
+    presion: Optional[float] = 1010
+    viento: Optional[float] = 5
+
+
+class PrediccionResponse(BaseModel):
+    probabilidad_bloqueo: float
+    clasificacion: str
+    recomendacion: str
+    fiabilidad_ajustada: float
 
 
 class AlertaCreate(BaseModel):
@@ -87,34 +90,14 @@ class AlertaResponse(BaseModel):
     timestamp: str
 
 
-class LoteCreate(BaseModel):
-    producto: str
-    cantidad_kg: float
-    agricultor_id: str
-
-
-class LoteResponse(BaseModel):
-    id: str
-    producto: str
-    cantidad_kg: float
-    agricultor_id: str
-    estado: str
-    timestamp: str
-
-
-class EventoLoteRequest(BaseModel):
-    evento: str  # "almacenar", "preparar_envio", "iniciar_transporte", "confirmar_entrega"
-
-
 # ========== INICIALIZACIÓN ==========
 
 app = FastAPI(
-    title="SIAR API",
-    description="Sistema de Información y Alerta Resiliente para Cooperativas Agrícolas",
-    version="1.0.0"
+    title="SIAR API - Sistema Nacional",
+    description="API REST para gestión de rutas, alertas y predicción climática en 9 departamentos del Perú",
+    version="2.0.0"
 )
 
-# Configurar CORS para permitir peticiones desde el frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -123,144 +106,203 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Cargar grafo
-GRAFO_PATH = "data/grafos/red_ayacucho.json"
-grafo = None
-algoritmo = None
+# Variables globales
+grafo: Optional[GrafoRutas] = None
+algoritmo: Optional[AlgoritmoFiabilidad] = None
+modelo_rn: Optional[RedNeuronalSimple] = None
+clasificador: Optional[ClasificadorRutas] = None
 
-# Almacenamiento en memoria (en producción usarías base de datos)
 alertas_db: Dict[str, Alerta] = {}
 lotes_db: Dict[str, LoteCosecha] = {}
 contador_alertas = 0
 contador_lotes = 0
 
-# Máquinas de estado
 fsm_alertas = MaquinaEstadosAlerta()
 fsm_logistica = MaquinaEstadosLogistica()
+
+# Coordenadas de departamentos
+COORDENADAS = {
+    'Lima': {'lat': -12.0464, 'lon': -77.0428},
+    'Cusco': {'lat': -13.5319, 'lon': -71.9675},
+    'Arequipa': {'lat': -16.4090, 'lon': -71.5375},
+    'Puno': {'lat': -15.8422, 'lon': -70.0199},
+    'Ayacucho': {'lat': -13.1631, 'lon': -74.2236},
+    'Junín': {'lat': -12.0699, 'lon': -75.2048},
+    'Cajamarca': {'lat': -7.1614, 'lon': -78.5126},
+    'San Martín': {'lat': -6.4833, 'lon': -76.3667},
+    'Amazonas': {'lat': -5.7667, 'lon': -77.8667}
+}
 
 
 @app.on_event("startup")
 async def startup_event():
-    """Cargar datos al iniciar el servidor."""
-    global grafo, algoritmo
+    """Cargar datos al iniciar."""
+    global grafo, algoritmo, modelo_rn, clasificador
     
+    print("\n" + "="*70)
+    print("🚀 INICIANDO SIAR API")
+    print("="*70 + "\n")
+    
+    # Cargar grafo
     try:
-        if os.path.exists(GRAFO_PATH):
-            grafo = GrafoRutas.cargar_json(GRAFO_PATH)
+        ruta_grafo = "data/grafos/red_peru_completa.json"
+        if os.path.exists(ruta_grafo):
+            grafo = GrafoRutas.cargar_json(ruta_grafo)
             algoritmo = AlgoritmoFiabilidad(grafo)
-            print(f"✅ Grafo cargado: {len(grafo.nodos)} nodos")
+            print(f"✅ Grafo cargado: {len(grafo.nodos)} departamentos")
         else:
-            print(f"⚠️  Archivo {GRAFO_PATH} no encontrado, creando grafo de ejemplo...")
+            print(f"⚠️  Creando grafo de ejemplo...")
             grafo = crear_grafo_ejemplo()
             algoritmo = AlgoritmoFiabilidad(grafo)
     except Exception as e:
         print(f"❌ Error cargando grafo: {e}")
+        grafo = crear_grafo_ejemplo()
+        algoritmo = AlgoritmoFiabilidad(grafo)
+    
+    # Cargar modelo de red neuronal
+    if RED_NEURONAL_DISPONIBLE:
+        try:
+            ruta_modelo = "data/modelos/red_neuronal_senamhi.npz"
+            if os.path.exists(ruta_modelo):
+                modelo_rn = RedNeuronalSimple()
+                modelo_rn.cargar_modelo(ruta_modelo)
+                print(f"✅ Red neuronal cargada")
+            else:
+                print(f"ℹ️  Red neuronal no cargada (modelo no encontrado)")
+        except Exception as e:
+            print(f"⚠️  Red neuronal no disponible: {e}")
+    
+    # Cargar clasificador
+    if ARBOL_DISPONIBLE:
+        try:
+            clasificador = ClasificadorRutas(max_depth=5)
+            # Entrenar con datos sintéticos si no hay modelo
+            df = clasificador.generar_datos_entrenamiento(1000)
+            X = df[clasificador.feature_names].values
+            y = df['clase'].values
+            clasificador.entrenar(X, y)
+            print(f"✅ Árbol de decisión entrenado")
+        except Exception as e:
+            print(f"⚠️  Árbol de decisión no disponible: {e}")
+    
+    print("\n" + "="*70)
+    print("✅ API LISTA")
+    print("="*70 + "\n")
 
 
 def crear_grafo_ejemplo() -> GrafoRutas:
-    """Crea un grafo de ejemplo si no existe el archivo."""
+    """Crea grafo de ejemplo si no existe archivo."""
     grafo = GrafoRutas()
-    grafo.agregar_camino("Ayacucho", "Huanta", 47, 0.95, TipoCamino.ASFALTADO, 0.1)
-    grafo.agregar_camino("Huanta", "Sivia", 85, 0.70, TipoCamino.AFIRMADO, 0.4)
-    grafo.agregar_camino("Ayacucho", "San Miguel", 135, 0.85, TipoCamino.AFIRMADO, 0.2)
+    
+    for depto in COORDENADAS.keys():
+        grafo.agregar_nodo(depto)
+    
+    # Rutas principales
+    rutas = [
+        ('Lima', 'Cusco', 1100, 0.85),
+        ('Lima', 'Arequipa', 1010, 0.90),
+        ('Cusco', 'Puno', 389, 0.88),
+        ('Lima', 'Cajamarca', 865, 0.83)
+    ]
+    
+    for origen, destino, km, fiab in rutas:
+        grafo.agregar_camino(origen, destino, km, fiab, TipoCamino.ASFALTADO, 0.15)
+    
     return grafo
 
 
-def ruta_to_response(ruta: Ruta) -> RutaResponse:
-    """Convierte objeto Ruta a RutaResponse."""
+def ruta_to_response(ruta: Ruta, clasificacion: str = None) -> RutaResponse:
+    """Convierte Ruta a RutaResponse."""
     return RutaResponse(
         nodos=ruta.nodos,
         distancia_km=ruta.distancia_total_km,
         fiabilidad=ruta.fiabilidad_acumulada,
         tiempo_min=ruta.tiempo_total_min,
-        peso=ruta.peso_total
+        peso=ruta.peso_total,
+        clasificacion=clasificacion
     )
 
 
-# ========== ENDPOINTS: RUTAS ==========
+# ========== ENDPOINTS ==========
 
 @app.get("/", tags=["General"])
 async def root():
     """Endpoint raíz."""
     return {
-        "mensaje": "Bienvenido a SIAR API",
-        "version": "1.0.0",
-        "documentacion": "/docs"
+        "nombre": "SIAR API - Sistema Nacional",
+        "version": "2.0.0",
+        "departamentos": len(COORDENADAS),
+        "documentacion": "/docs",
+        "estado": "operativo"
     }
 
 
 @app.get("/grafos/nodos", response_model=List[str], tags=["Grafos"])
 async def obtener_nodos():
-    """Lista todos los nodos (localidades) disponibles."""
+    """Lista todos los departamentos disponibles."""
     if grafo is None:
         raise HTTPException(status_code=503, detail="Grafo no disponible")
     return sorted(list(grafo.nodos))
 
 
+@app.get("/grafos/coordenadas", tags=["Grafos"])
+async def obtener_coordenadas():
+    """Obtiene coordenadas GPS de todos los departamentos."""
+    return COORDENADAS
+
+
 @app.get("/grafos/info", tags=["Grafos"])
 async def info_grafo():
-    """Obtiene estadísticas de la red."""
+    """Estadísticas de la red vial."""
     if grafo is None:
         raise HTTPException(status_code=503, detail="Grafo no disponible")
     
     num_aristas = sum(len(v) for v in grafo.adyacencias.values()) // 2
     
-    # Calcular fiabilidad promedio
-    fiabilidad_total = 0
-    count = 0
-    aristas_vistas = set()
-    
-    for origen, aristas in grafo.adyacencias.items():
-        for arista in aristas:
-            par = tuple(sorted([arista.origen, arista.destino]))
-            if par not in aristas_vistas:
-                fiabilidad_total += arista.fiabilidad
-                count += 1
-                aristas_vistas.add(par)
-    
-    fiabilidad_promedio = fiabilidad_total / count if count > 0 else 0
-    
     return {
-        "nodos": len(grafo.nodos),
-        "aristas": num_aristas,
-        "fiabilidad_promedio": round(fiabilidad_promedio, 2),
-        "localidades": sorted(list(grafo.nodos))
+        "departamentos": len(grafo.nodos),
+        "rutas": num_aristas,
+        "modelos_activos": {
+            "red_neuronal": modelo_rn is not None,
+            "arbol_decision": clasificador is not None
+        }
     }
 
 
 @app.get("/rutas/calcular", response_model=RutaResponse, tags=["Rutas"])
 async def calcular_ruta(origen: str, destino: str):
-    """
-    Calcula la ruta más fiable entre dos puntos.
-    
-    - **origen**: Nodo de inicio
-    - **destino**: Nodo de llegada
-    """
+    """Calcula la ruta más fiable entre dos departamentos."""
     if algoritmo is None:
         raise HTTPException(status_code=503, detail="Algoritmo no disponible")
     
     if origen not in grafo.nodos:
-        raise HTTPException(status_code=404, detail=f"Nodo '{origen}' no encontrado")
+        raise HTTPException(status_code=404, detail=f"Departamento '{origen}' no encontrado")
     if destino not in grafo.nodos:
-        raise HTTPException(status_code=404, detail=f"Nodo '{destino}' no encontrado")
+        raise HTTPException(status_code=404, detail=f"Departamento '{destino}' no encontrado")
     
     try:
         ruta = algoritmo.encontrar_ruta_mas_fiable(origen, destino)
         if ruta is None:
-            raise HTTPException(status_code=404, detail="No existe ruta entre los nodos")
-        return ruta_to_response(ruta)
+            raise HTTPException(status_code=404, detail="No existe ruta")
+        
+        # Clasificar ruta si hay árbol disponible
+        clasificacion = None
+        if clasificador and clasificador.entrenado:
+            # Usar valores promedio para clasificar
+            clase_num, clase_nombre, _ = clasificador.predecir(
+                precipitacion=5, temperatura=20, tipo_camino=2,
+                mes=6, riesgo_historico=0.2, hora=12
+            )
+            clasificacion = clase_nombre
+        
+        return ruta_to_response(ruta, clasificacion)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/rutas/comparar", response_model=ComparacionRutasResponse, tags=["Rutas"])
 async def comparar_rutas(origen: str, destino: str):
-    """
-    Compara diferentes criterios de optimización de rutas.
-    
-    - **origen**: Nodo de inicio
-    - **destino**: Nodo de llegada
-    """
+    """Compara diferentes criterios de optimización."""
     if algoritmo is None:
         raise HTTPException(status_code=503, detail="Algoritmo no disponible")
     
@@ -275,11 +317,56 @@ async def comparar_rutas(origen: str, destino: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ========== ENDPOINTS: ALERTAS ==========
+@app.post("/prediccion/clima", response_model=PrediccionResponse, tags=["Predicción"])
+async def predecir_clima(datos: PrediccionClima):
+    """Predice riesgo de bloqueo basado en condiciones climáticas."""
+    
+    # Predicción simple por defecto
+    prob_bloqueo = 0.0
+    
+    if datos.precipitacion > 30:
+        prob_bloqueo += 0.4
+    if datos.temperatura < 5 or datos.temperatura > 35:
+        prob_bloqueo += 0.3
+    if datos.humedad > 90:
+        prob_bloqueo += 0.2
+    
+    prob_bloqueo = min(1.0, prob_bloqueo)
+    
+    # Usar red neuronal si está disponible
+    if modelo_rn is not None:
+        try:
+            import numpy as np
+            X = np.array([[datos.temperatura, datos.precipitacion, 
+                          datos.humedad, datos.presion, datos.viento]])
+            prob_bloqueo = float(modelo_rn.predecir(X)[0])
+        except:
+            pass
+    
+    # Clasificación
+    if prob_bloqueo > 0.7:
+        clasificacion = "PELIGROSA"
+        recomendacion = "⛔ ALTO RIESGO: Evitar viaje"
+    elif prob_bloqueo > 0.4:
+        clasificacion = "MODERADA"
+        recomendacion = "⚠️  RIESGO MODERADO: Precaución"
+    else:
+        clasificacion = "SEGURA"
+        recomendacion = "✅ RIESGO BAJO: Condiciones favorables"
+    
+    fiabilidad_ajustada = 0.85 * (1 - prob_bloqueo * 0.5)
+    
+    return PrediccionResponse(
+        probabilidad_bloqueo=prob_bloqueo,
+        clasificacion=clasificacion,
+        recomendacion=recomendacion,
+        fiabilidad_ajustada=fiabilidad_ajustada
+    )
+
 
 @app.post("/alertas/crear", response_model=AlertaResponse, tags=["Alertas"])
 async def crear_alerta(alerta_data: AlertaCreate):
-    """Crea una nueva alerta en el sistema."""
+    """Crea una nueva alerta."""
     global contador_alertas
     contador_alertas += 1
     
@@ -293,15 +380,6 @@ async def crear_alerta(alerta_data: AlertaCreate):
     )
     
     alertas_db[alerta.id] = alerta
-    
-    # Si la alerta menciona una ruta, reducir su fiabilidad
-    if "bloqueo" in alerta.tipo.lower() and grafo:
-        # Lógica simple: buscar nodos mencionados
-        for nodo in grafo.nodos:
-            if nodo.lower() in alerta.ubicacion.lower():
-                for vecino in grafo.obtener_vecinos(nodo):
-                    if vecino.destino.lower() in alerta.ubicacion.lower():
-                        grafo.actualizar_fiabilidad(nodo, vecino.destino, 0.3)
     
     return AlertaResponse(
         id=alerta.id,
@@ -317,7 +395,7 @@ async def crear_alerta(alerta_data: AlertaCreate):
 
 @app.get("/alertas/activas", response_model=List[AlertaResponse], tags=["Alertas"])
 async def obtener_alertas_activas():
-    """Lista todas las alertas activas (no resueltas)."""
+    """Lista alertas activas."""
     alertas_activas = [
         AlertaResponse(
             id=alerta.id,
@@ -335,131 +413,22 @@ async def obtener_alertas_activas():
     return alertas_activas
 
 
-@app.post("/alertas/{alerta_id}/confirmar", tags=["Alertas"])
-async def confirmar_alerta(alerta_id: str, usuario_id: str):
-    """Confirma una alerta (aumenta su nivel de confianza)."""
-    if alerta_id not in alertas_db:
-        raise HTTPException(status_code=404, detail="Alerta no encontrada")
-    
-    alerta = alertas_db[alerta_id]
-    
-    if alerta.estado == EstadoAlerta.EMITIDA:
-        fsm_alertas.procesar_evento(alerta, EventoAlerta.SOLICITAR_VERIFICACION)
-    
-    if usuario_id not in alerta.confirmaciones:
-        alerta.confirmaciones.append(usuario_id)
-        alerta.nivel_confianza = fsm_alertas._calcular_confianza(alerta)
-    
-    return {"mensaje": "Alerta confirmada", "confianza": alerta.nivel_confianza}
-
-
-@app.post("/alertas/{alerta_id}/resolver", tags=["Alertas"])
-async def resolver_alerta(alerta_id: str):
-    """Marca una alerta como resuelta."""
-    if alerta_id not in alertas_db:
-        raise HTTPException(status_code=404, detail="Alerta no encontrada")
-    
-    alerta = alertas_db[alerta_id]
-    
-    # Avanzar por los estados necesarios
-    if alerta.estado == EstadoAlerta.EMITIDA:
-        fsm_alertas.procesar_evento(alerta, EventoAlerta.SOLICITAR_VERIFICACION)
-    if alerta.estado == EstadoAlerta.EN_VERIFICACION:
-        fsm_alertas.procesar_evento(alerta, EventoAlerta.CONFIRMAR)
-    if alerta.estado == EstadoAlerta.CONFIRMADA:
-        fsm_alertas.procesar_evento(alerta, EventoAlerta.ATENDER)
-    if alerta.estado == EstadoAlerta.EN_ATENCION:
-        fsm_alertas.procesar_evento(alerta, EventoAlerta.RESOLVER)
-    
-    return {"mensaje": "Alerta resuelta", "estado": alerta.estado.value}
-
-
-# ========== ENDPOINTS: LOGÍSTICA ==========
-
-@app.post("/lotes/crear", response_model=LoteResponse, tags=["Logística"])
-async def crear_lote(lote_data: LoteCreate):
-    """Registra un nuevo lote de cosecha."""
-    global contador_lotes
-    contador_lotes += 1
-    
-    lote = LoteCosecha(
-        id=f"LOT-{contador_lotes:04d}",
-        producto=lote_data.producto,
-        cantidad_kg=lote_data.cantidad_kg,
-        agricultor_id=lote_data.agricultor_id
-    )
-    
-    lotes_db[lote.id] = lote
-    
-    return LoteResponse(
-        id=lote.id,
-        producto=lote.producto,
-        cantidad_kg=lote.cantidad_kg,
-        agricultor_id=lote.agricultor_id,
-        estado=lote.estado.value,
-        timestamp=lote.timestamp_registro.isoformat()
-    )
-
-
-@app.get("/lotes/{lote_id}", response_model=LoteResponse, tags=["Logística"])
-async def obtener_lote(lote_id: str):
-    """Obtiene información de un lote específico."""
-    if lote_id not in lotes_db:
-        raise HTTPException(status_code=404, detail="Lote no encontrado")
-    
-    lote = lotes_db[lote_id]
-    return LoteResponse(
-        id=lote.id,
-        producto=lote.producto,
-        cantidad_kg=lote.cantidad_kg,
-        agricultor_id=lote.agricultor_id,
-        estado=lote.estado.value,
-        timestamp=lote.timestamp_registro.isoformat()
-    )
-
-
-@app.post("/lotes/{lote_id}/avanzar", tags=["Logística"])
-async def avanzar_lote(lote_id: str, evento_data: EventoLoteRequest):
-    """Avanza el lote al siguiente estado en el flujo logístico."""
-    if lote_id not in lotes_db:
-        raise HTTPException(status_code=404, detail="Lote no encontrado")
-    
-    lote = lotes_db[lote_id]
-    
-    # Mapear string a EventoLote
-    eventos = {
-        "almacenar": EventoLote.ALMACENAR,
-        "preparar_envio": EventoLote.PREPARAR_ENVIO,
-        "iniciar_transporte": EventoLote.INICIAR_TRANSPORTE,
-        "confirmar_entrega": EventoLote.CONFIRMAR_ENTREGA
-    }
-    
-    if evento_data.evento not in eventos:
-        raise HTTPException(status_code=400, detail="Evento inválido")
-    
-    evento = eventos[evento_data.evento]
-    exito = fsm_logistica.procesar_evento(lote, evento)
-    
-    if not exito:
-        raise HTTPException(status_code=400, detail="Transición inválida")
-    
-    return {"mensaje": "Lote actualizado", "nuevo_estado": lote.estado.value}
-
-
-# ========== ENDPOINT DE PRUEBA ==========
-
 @app.get("/test", tags=["Test"])
 async def test_endpoint():
-    """Endpoint de prueba para verificar que la API funciona."""
+    """Endpoint de prueba."""
     return {
         "status": "OK",
         "timestamp": datetime.now().isoformat(),
-        "grafos_cargados": grafo is not None,
-        "alertas_activas": len([a for a in alertas_db.values() if a.estado != EstadoAlerta.RESUELTA]),
-        "lotes_registrados": len(lotes_db)
+        "grafo_activo": grafo is not None,
+        "departamentos": len(COORDENADAS),
+        "alertas": len(alertas_db),
+        "modelos": {
+            "red_neuronal": RED_NEURONAL_DISPONIBLE and modelo_rn is not None,
+            "arbol_decision": ARBOL_DISPONIBLE and clasificador is not None
+        }
     }
 
 
 if __name__ == "__main__":
-    import uvicorn # type: ignore
+    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

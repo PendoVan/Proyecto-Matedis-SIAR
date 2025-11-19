@@ -3,68 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIAR - Sistema de Información y Alerta Resiliente</title>
-    
-    <!-- Leaflet CSS -->
+    <title>SIAR - Sistema Nacional de Rutas Inteligentes</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            height: 100vh;
+            overflow: hidden;
         }
 
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            height: 100vh;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            overflow: hidden;
         }
 
         header {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
-            padding: 30px;
-            text-align: center;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
         header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 1.8em;
+            margin-bottom: 5px;
         }
 
         header p {
-            font-size: 1.1em;
             opacity: 0.9;
+            font-size: 0.95em;
         }
 
         .main-content {
             display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 0;
-            height: calc(100vh - 200px);
+            grid-template-columns: 320px 1fr;
+            height: calc(100vh - 80px);
+            overflow: hidden;
         }
 
         .sidebar {
-            background: #f5f5f5;
-            padding: 20px;
+            background: #f8f9fa;
+            padding: 15px;
             overflow-y: auto;
-            border-right: 2px solid #ddd;
+            border-right: 2px solid #dee2e6;
         }
 
         .map-container {
             position: relative;
-            background: #e0e0e0;
+            background: #e9ecef;
         }
 
         #map {
@@ -72,30 +63,29 @@
             height: 100%;
         }
 
-        .tabs {
+        .tab-buttons {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 15px;
         }
 
-        .tab {
-            padding: 12px 15px;
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
             background: white;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s;
             font-weight: 600;
-            text-align: left;
+            font-size: 0.85em;
+            transition: all 0.2s;
         }
 
-        .tab:hover {
+        .tab-btn:hover {
             border-color: #667eea;
-            transform: translateX(5px);
         }
 
-        .tab.active {
+        .tab-btn.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border-color: #667eea;
@@ -111,99 +101,76 @@
 
         .card {
             background: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .card h3 {
+            font-size: 1em;
+            margin-bottom: 10px;
             color: #333;
-            margin-bottom: 15px;
-            font-size: 1.2em;
         }
 
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             font-weight: 600;
+            font-size: 0.85em;
             color: #555;
-            font-size: 0.9em;
         }
 
-        input, select, textarea {
+        select, input, textarea {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
             font-size: 0.9em;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 60px;
         }
 
         button {
+            width: 100%;
+            padding: 10px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
+            border-radius: 6px;
             font-weight: 600;
-            width: 100%;
+            cursor: pointer;
             transition: transform 0.2s;
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .map-info {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            max-width: 300px;
-            z-index: 1000;
-        }
-
-        .map-info h4 {
-            margin-bottom: 10px;
-            color: #667eea;
-        }
-
-        .route-stats {
+        .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 8px;
             margin-top: 10px;
         }
 
-        .stat-item {
-            background: #f0f0f0;
+        .stat-box {
+            background: #f8f9fa;
             padding: 8px;
-            border-radius: 5px;
+            border-radius: 4px;
             text-align: center;
         }
 
         .stat-label {
-            font-size: 0.75em;
-            color: #666;
+            font-size: 0.7em;
+            color: #6c757d;
+            text-transform: uppercase;
         }
 
         .stat-value {
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: bold;
             color: #333;
         }
@@ -213,238 +180,229 @@
             bottom: 20px;
             left: 20px;
             background: white;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             z-index: 1000;
         }
 
         .legend h5 {
-            margin-bottom: 10px;
-            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.9em;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 5px;
+            gap: 8px;
+            margin-bottom: 4px;
+            font-size: 0.8em;
         }
 
-        .legend-color {
-            width: 30px;
-            height: 4px;
+        .legend-line {
+            width: 25px;
+            height: 3px;
             border-radius: 2px;
         }
 
-        .alert-marker {
-            background: #ff4444;
-            width: 30px;
-            height: 30px;
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 16px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            background: #28a745;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
         }
 
-        .loading {
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .route-path {
+            background: #e7f3ff;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 8px 0;
             text-align: center;
-            padding: 20px;
-            color: #999;
+            font-weight: 600;
+            font-size: 0.9em;
         }
 
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
+        .alert-item {
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 4px;
             font-size: 0.85em;
         }
 
-        .success {
+        .clasificacion {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .clasificacion.SEGURA {
             background: #d4edda;
             color: #155724;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            font-size: 0.85em;
         }
 
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-                height: auto;
-            }
+        .clasificacion.MODERADA {
+            background: #fff3cd;
+            color: #856404;
+        }
 
-            .sidebar {
-                height: 400px;
-            }
-
-            #map {
-                height: 400px;
-            }
+        .clasificacion.PELIGROSA {
+            background: #f8d7da;
+            color: #721c24;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🌾 SIAR</h1>
-            <p>Sistema de Información y Alerta Resiliente para Cooperativas Agrícolas</p>
+            <h1>🌾 SIAR - Sistema Nacional</h1>
+            <p>Gestión Inteligente de Rutas en 9 Departamentos del Perú</p>
         </header>
 
         <div class="main-content">
-            <!-- Sidebar -->
             <div class="sidebar">
-                <div class="tabs">
-                    <button class="tab active" onclick="switchTab('rutas')">🗺️ Calcular Ruta</button>
-                    <button class="tab" onclick="switchTab('alertas')">🚨 Alertas</button>
-                    <button class="tab" onclick="switchTab('comparar')">📊 Comparar Rutas</button>
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchTab('rutas')">🗺️ Rutas</button>
+                    <button class="tab-btn" onclick="switchTab('comparar')">📊 Comparar</button>
+                    <button class="tab-btn" onclick="switchTab('clima')">🌦️ Clima</button>
                 </div>
 
-                <!-- TAB: RUTAS -->
+                <!-- TAB RUTAS -->
                 <div id="rutas" class="tab-content active">
                     <div class="card">
                         <h3>Calcular Ruta Óptima</h3>
                         <div class="form-group">
                             <label>Origen:</label>
-                            <select id="origen">
-                                <option value="">Cargando...</option>
-                            </select>
+                            <select id="origen"></select>
                         </div>
                         <div class="form-group">
                             <label>Destino:</label>
-                            <select id="destino">
-                                <option value="">Cargando...</option>
-                            </select>
+                            <select id="destino"></select>
                         </div>
                         <button onclick="calcularRuta()">🔍 Buscar Ruta</button>
                     </div>
-
                     <div id="resultado-ruta"></div>
                 </div>
 
-                <!-- TAB: ALERTAS -->
-                <div id="alertas" class="tab-content">
-                    <div class="card">
-                        <h3>Crear Alerta</h3>
-                        <div class="form-group">
-                            <label>Tipo:</label>
-                            <select id="tipo-alerta">
-                                <option value="bloqueo_carretera">🚧 Bloqueo</option>
-                                <option value="lluvia_intensa">🌧️ Lluvia</option>
-                                <option value="derrumbe">⛰️ Derrumbe</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Ubicación:</label>
-                            <input type="text" id="ubicacion-alerta" placeholder="Ej: Km 32">
-                        </div>
-                        <div class="form-group">
-                            <label>Descripción:</label>
-                            <textarea id="descripcion-alerta"></textarea>
-                        </div>
-                        <button onclick="crearAlerta()">📤 Enviar</button>
-                    </div>
-
-                    <div id="lista-alertas"></div>
-                </div>
-
-                <!-- TAB: COMPARAR -->
+                <!-- TAB COMPARAR -->
                 <div id="comparar" class="tab-content">
                     <div class="card">
                         <h3>Comparar Criterios</h3>
                         <div class="form-group">
                             <label>Origen:</label>
-                            <select id="origen-comp">
-                                <option value="">Seleccionar...</option>
-                            </select>
+                            <select id="origen-comp"></select>
                         </div>
                         <div class="form-group">
                             <label>Destino:</label>
-                            <select id="destino-comp">
-                                <option value="">Seleccionar...</option>
-                            </select>
+                            <select id="destino-comp"></select>
                         </div>
                         <button onclick="compararRutas()">📊 Comparar</button>
                     </div>
+                    <div id="resultado-comp"></div>
+                </div>
 
-                    <div id="resultado-comparacion"></div>
+                <!-- TAB CLIMA -->
+                <div id="clima" class="tab-content">
+                    <div class="card">
+                        <h3>Predicción Climática</h3>
+                        <div class="form-group">
+                            <label>Temperatura (°C):</label>
+                            <input type="number" id="temp" value="20" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>Precipitación (mm):</label>
+                            <input type="number" id="precip" value="5" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>Humedad (%):</label>
+                            <input type="number" id="humedad" value="70" step="1">
+                        </div>
+                        <button onclick="predecirClima()">🔮 Predecir</button>
+                    </div>
+                    <div id="resultado-clima"></div>
                 </div>
             </div>
 
-            <!-- Mapa -->
             <div class="map-container">
                 <div id="map"></div>
                 
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span>Sistema Activo</span>
+                </div>
+
                 <div class="legend">
-                    <h5>Leyenda</h5>
+                    <h5>Fiabilidad de Rutas</h5>
                     <div class="legend-item">
-                        <div class="legend-color" style="background: #4CAF50;"></div>
-                        <span>Alta fiabilidad (&gt;80%)</span>
+                        <div class="legend-line" style="background: #28a745;"></div>
+                        <span>Alta (&gt;80%)</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background: #FF9800;"></div>
-                        <span>Media fiabilidad (60-80%)</span>
+                        <div class="legend-line" style="background: #ffc107;"></div>
+                        <span>Media (60-80%)</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-color" style="background: #f44336;"></div>
-                        <span>Baja fiabilidad (&lt;60%)</span>
+                        <div class="legend-line" style="background: #dc3545;"></div>
+                        <span>Baja (&lt;60%)</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
     <script>
         const API_BASE = 'http://localhost:8000';
-        
-        // Coordenadas de ciudades
-        const COORDENADAS = {
-            'Ayacucho': [-13.1631, -74.2236],
-            'Huanta': [-12.9394, -74.2472],
-            'San Miguel': [-13.0122, -73.9808],
-            'Tambo': [-14.7986, -73.9186],
-            'Quinua': [-13.0500, -74.1333],
-            'Sivia': [-12.4500, -73.7833]
-        };
+        let map, rutaLayer, marcadoresLayer;
+        let COORDENADAS = {};
 
         // Inicializar mapa
-        const map = L.map('map').setView([-13.1631, -74.2236], 9);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+        function initMap() {
+            map = L.map('map').setView([-9.19, -75.0152], 6);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
 
-        // Capas para rutas y marcadores
-        let rutaLayer = L.layerGroup().addTo(map);
-        let marcadoresLayer = L.layerGroup().addTo(map);
-        let alertasLayer = L.layerGroup().addTo(map);
-
-        // Agregar marcadores de ciudades
-        function agregarMarcadoresCiudades() {
-            Object.entries(COORDENADAS).forEach(([ciudad, coords]) => {
-                L.marker(coords)
-                    .bindPopup(`<b>${ciudad}</b>`)
-                    .addTo(marcadoresLayer);
-            });
+            rutaLayer = L.layerGroup().addTo(map);
+            marcadoresLayer = L.layerGroup().addTo(map);
         }
 
-        agregarMarcadoresCiudades();
-
-        // Cargar nodos
-        async function cargarNodos() {
+        // Cargar nodos y coordenadas
+        async function cargarDatos() {
             try {
-                const response = await fetch(`${API_BASE}/grafos/nodos`);
-                const nodos = await response.json();
-                
+                const [nodos, coords] = await Promise.all([
+                    fetch(`${API_BASE}/grafos/nodos`).then(r => r.json()),
+                    fetch(`${API_BASE}/grafos/coordenadas`).then(r => r.json())
+                ]);
+
+                COORDENADAS = coords;
+
                 const selects = ['origen', 'destino', 'origen-comp', 'destino-comp'];
                 selects.forEach(id => {
                     const select = document.getElementById(id);
@@ -452,22 +410,24 @@
                         `<option value="${n}">${n}</option>`
                     ).join('');
                 });
+
+                // Agregar marcadores
+                Object.entries(COORDENADAS).forEach(([depto, coords]) => {
+                    L.marker([coords.lat, coords.lon])
+                        .bindPopup(`<b>${depto}</b>`)
+                        .addTo(marcadoresLayer);
+                });
+
             } catch (error) {
-                console.error('Error cargando nodos:', error);
+                console.error('Error cargando datos:', error);
             }
         }
 
-        // Calcular y mostrar ruta
+        // Calcular ruta
         async function calcularRuta() {
             const origen = document.getElementById('origen').value;
             const destino = document.getElementById('destino').value;
-            
-            if (!origen || !destino) {
-                alert('Selecciona origen y destino');
-                return;
-            }
 
-            // Limpiar mapa
             rutaLayer.clearLayers();
 
             try {
@@ -476,12 +436,14 @@
                 );
                 const ruta = await response.json();
 
-                // Dibujar ruta en mapa
-                const coordsRuta = ruta.nodos.map(n => COORDENADAS[n]);
-                
-                const color = ruta.fiabilidad > 0.8 ? '#4CAF50' : 
-                             ruta.fiabilidad > 0.6 ? '#FF9800' : '#f44336';
-                
+                // Dibujar ruta
+                const coordsRuta = ruta.nodos.map(n => 
+                    [COORDENADAS[n].lat, COORDENADAS[n].lon]
+                );
+
+                const color = ruta.fiabilidad > 0.8 ? '#28a745' : 
+                             ruta.fiabilidad > 0.6 ? '#ffc107' : '#dc3545';
+
                 const polyline = L.polyline(coordsRuta, {
                     color: color,
                     weight: 5,
@@ -493,31 +455,33 @@
                 // Mostrar info
                 document.getElementById('resultado-ruta').innerHTML = `
                     <div class="card">
-                        <h3>📍 ${ruta.nodos.join(' → ')}</h3>
-                        <div class="route-stats">
-                            <div class="stat-item">
+                        <div class="route-path">${ruta.nodos.join(' → ')}</div>
+                        <div class="stats-grid">
+                            <div class="stat-box">
                                 <div class="stat-label">Distancia</div>
-                                <div class="stat-value">${ruta.distancia_km.toFixed(1)} km</div>
+                                <div class="stat-value">${ruta.distancia_km.toFixed(0)} km</div>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-box">
                                 <div class="stat-label">Fiabilidad</div>
                                 <div class="stat-value">${(ruta.fiabilidad * 100).toFixed(1)}%</div>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-box">
                                 <div class="stat-label">Tiempo</div>
-                                <div class="stat-value">${ruta.tiempo_min} min</div>
+                                <div class="stat-value">${Math.floor(ruta.tiempo_min/60)}h ${ruta.tiempo_min%60}m</div>
                             </div>
-                            <div class="stat-item">
+                            <div class="stat-box">
                                 <div class="stat-label">Peso</div>
                                 <div class="stat-value">${ruta.peso.toFixed(1)}</div>
                             </div>
                         </div>
+                        ${ruta.clasificacion ? `<div class="clasificacion ${ruta.clasificacion}">
+                            ${ruta.clasificacion}
+                        </div>` : ''}
                     </div>
                 `;
 
             } catch (error) {
-                document.getElementById('resultado-ruta').innerHTML = 
-                    `<div class="error">Error: ${error.message}</div>`;
+                console.error(error);
             }
         }
 
@@ -525,8 +489,6 @@
         async function compararRutas() {
             const origen = document.getElementById('origen-comp').value;
             const destino = document.getElementById('destino-comp').value;
-            
-            if (!origen || !destino) return;
 
             rutaLayer.clearLayers();
 
@@ -538,13 +500,15 @@
 
                 // Dibujar las 3 rutas
                 const rutas = [
-                    {data: comp.mas_fiable, color: '#4CAF50', label: 'Más Fiable'},
-                    {data: comp.mas_corta, color: '#2196F3', label: 'Más Corta'},
-                    {data: comp.mas_rapida, color: '#FF9800', label: 'Más Rápida'}
+                    {data: comp.mas_fiable, color: '#28a745', label: 'Más Fiable'},
+                    {data: comp.mas_corta, color: '#007bff', label: 'Más Corta'},
+                    {data: comp.mas_rapida, color: '#ffc107', label: 'Más Rápida'}
                 ];
 
                 rutas.forEach(({data, color, label}) => {
-                    const coords = data.nodos.map(n => COORDENADAS[n]);
+                    const coords = data.nodos.map(n => 
+                        [COORDENADAS[n].lat, COORDENADAS[n].lon]
+                    );
                     L.polyline(coords, {
                         color: color,
                         weight: 4,
@@ -552,26 +516,21 @@
                     }).bindPopup(label).addTo(rutaLayer);
                 });
 
-                map.fitBounds(L.polyline(
-                    comp.mas_fiable.nodos.map(n => COORDENADAS[n])
-                ).getBounds());
-
-                // Mostrar comparación
-                document.getElementById('resultado-comparacion').innerHTML = `
-                    <div class="card" style="background: #e8f5e9;">
-                        <h4>🏆 Más Fiable</h4>
-                        <p>${comp.mas_fiable.nodos.join(' → ')}</p>
-                        <p><strong>Fiabilidad:</strong> ${(comp.mas_fiable.fiabilidad*100).toFixed(1)}%</p>
+                document.getElementById('resultado-comp').innerHTML = `
+                    <div class="card" style="background: #d4edda;">
+                        <strong>🏆 Más Fiable</strong>
+                        <p style="font-size: 0.8em;">${comp.mas_fiable.nodos.join(' → ')}</p>
+                        <small>Fiabilidad: ${(comp.mas_fiable.fiabilidad*100).toFixed(1)}%</small>
                     </div>
-                    <div class="card" style="background: #e3f2fd;">
-                        <h4>📏 Más Corta</h4>
-                        <p>${comp.mas_corta.nodos.join(' → ')}</p>
-                        <p><strong>Distancia:</strong> ${comp.mas_corta.distancia_km.toFixed(1)} km</p>
+                    <div class="card" style="background: #d1ecf1;">
+                        <strong>📏 Más Corta</strong>
+                        <p style="font-size: 0.8em;">${comp.mas_corta.nodos.join(' → ')}</p>
+                        <small>Distancia: ${comp.mas_corta.distancia_km.toFixed(0)} km</small>
                     </div>
-                    <div class="card" style="background: #fff3e0;">
-                        <h4>⚡ Más Rápida</h4>
-                        <p>${comp.mas_rapida.nodos.join(' → ')}</p>
-                        <p><strong>Tiempo:</strong> ${comp.mas_rapida.tiempo_min} min</p>
+                    <div class="card" style="background: #fff3cd;">
+                        <strong>⚡ Más Rápida</strong>
+                        <p style="font-size: 0.8em;">${comp.mas_rapida.nodos.join(' → ')}</p>
+                        <small>Tiempo: ${Math.floor(comp.mas_rapida.tiempo_min/60)}h ${comp.mas_rapida.tiempo_min%60}m</small>
                     </div>
                 `;
 
@@ -580,76 +539,46 @@
             }
         }
 
-        // Crear alerta
-        async function crearAlerta() {
-            const tipo = document.getElementById('tipo-alerta').value;
-            const ubicacion = document.getElementById('ubicacion-alerta').value;
-            const descripcion = document.getElementById('descripcion-alerta').value;
-
-            if (!ubicacion || !descripcion) {
-                alert('Completa todos los campos');
-                return;
-            }
+        // Predecir clima
+        async function predecirClima() {
+            const temp = parseFloat(document.getElementById('temp').value);
+            const precip = parseFloat(document.getElementById('precip').value);
+            const humedad = parseFloat(document.getElementById('humedad').value);
 
             try {
-                await fetch(`${API_BASE}/alertas/crear`, {
+                const response = await fetch(`${API_BASE}/prediccion/clima`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        tipo, ubicacion, descripcion, 
-                        emisor: 'WEB-USER'
+                        temperatura: temp,
+                        precipitacion: precip,
+                        humedad: humedad
                     })
                 });
 
-                alert('✅ Alerta creada');
-                document.getElementById('ubicacion-alerta').value = '';
-                document.getElementById('descripcion-alerta').value = '';
-                cargarAlertas();
+                const pred = await response.json();
 
-            } catch (error) {
-                alert('Error: ' + error.message);
-            }
-        }
-
-        // Cargar alertas
-        async function cargarAlertas() {
-            try {
-                const response = await fetch(`${API_BASE}/alertas/activas`);
-                const alertas = await response.json();
-
-                alertasLayer.clearLayers();
-
-                alertas.forEach(alerta => {
-                    // Buscar ciudad mencionada en ubicación
-                    for (const [ciudad, coords] of Object.entries(COORDENADAS)) {
-                        if (alerta.ubicacion.includes(ciudad)) {
-                            L.marker(coords, {
-                                icon: L.divIcon({
-                                    className: 'alert-marker',
-                                    html: '⚠️',
-                                    iconSize: [30, 30]
-                                })
-                            })
-                            .bindPopup(`
-                                <b>${alerta.tipo}</b><br>
-                                ${alerta.ubicacion}<br>
-                                <small>Confianza: ${(alerta.nivel_confianza*100).toFixed(0)}%</small>
-                            `)
-                            .addTo(alertasLayer);
-                            break;
-                        }
-                    }
-                });
-
-                document.getElementById('lista-alertas').innerHTML = 
-                    alertas.length === 0 ? '<p class="loading">No hay alertas activas</p>' :
-                    alertas.map(a => `
-                        <div class="card" style="border-left: 4px solid #ff4444;">
-                            <strong>${a.tipo}</strong>
-                            <p style="font-size: 0.85em;">${a.ubicacion}</p>
-                            <p style="font-size: 0.85em;">Confianza: ${(a.nivel_confianza*100).toFixed(0)}%</p>
+                document.getElementById('resultado-clima').innerHTML = `
+                    <div class="card">
+                        <h3>Resultado</h3>
+                        <div class="clasificacion ${pred.clasificacion}">
+                            ${pred.clasificacion}
                         </div>
-                    `).join('');
+                        <div class="stats-grid" style="margin-top: 10px;">
+                            <div class="stat-box">
+                                <div class="stat-label">Riesgo Bloqueo</div>
+                                <div class="stat-value">${(pred.probabilidad_bloqueo*100).toFixed(1)}%</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Fiabilidad</div>
+                                <div class="stat-value">${(pred.fiabilidad_ajustada*100).toFixed(1)}%</div>
+                            </div>
+                        </div>
+                        <p style="margin-top: 10px; font-size: 0.85em; color: #666;">
+                            ${pred.recomendacion}
+                        </p>
+                    </div>
+                `;
 
             } catch (error) {
                 console.error(error);
@@ -658,21 +587,17 @@
 
         // Cambiar tab
         function switchTab(tabName) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
             
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
-
-            if (tabName === 'alertas') {
-                cargarAlertas();
-            }
         }
 
         // Inicializar
         window.onload = () => {
-            cargarNodos();
-            cargarAlertas();
+            initMap();
+            cargarDatos();
         };
     </script>
 </body>

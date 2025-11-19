@@ -1,0 +1,47 @@
+{
+  "Lima": {
+    "lat": -12.0464,
+    "lon": -77.0428,
+    "poblacion": 9674755
+  },
+  "Cusco": {
+    "lat": -13.5319,
+    "lon": -71.9675,
+    "poblacion": 437538
+  },
+  "Arequipa": {
+    "lat": -16.409,
+    "lon": -71.5375,
+    "poblacion": 1008290
+  },
+  "Puno": {
+    "lat": -15.8422,
+    "lon": -70.0199,
+    "poblacion": 140839
+  },
+  "Ayacucho": {
+    "lat": -13.1631,
+    "lon": -74.2236,
+    "poblacion": 180000
+  },
+  "Junín": {
+    "lat": -12.0699,
+    "lon": -75.2048,
+    "poblacion": 430000
+  },
+  "Cajamarca": {
+    "lat": -7.1614,
+    "lon": -78.5126,
+    "poblacion": 283767
+  },
+  "San Martín": {
+    "lat": -6.4833,
+    "lon": -76.3667,
+    "poblacion": 62387
+  },
+  "Amazonas": {
+    "lat": -5.7667,
+    "lon": -77.8667,
+    "poblacion": 32026
+  }
+}
