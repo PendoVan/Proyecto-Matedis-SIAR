@@ -28,7 +28,7 @@ from src.unidad3_grafos.maquina_estados import (
 
 # Intentar importar red neuronal
 try:
-    from src.unidad3_grafos.red_neuronal_simple import RedNeuronalSimple
+    from src.unidad3_grafos.red_neuronal_tensorflow import RedNeuronalClima
     RED_NEURONAL_DISPONIBLE = True
 except:
     RED_NEURONAL_DISPONIBLE = False
@@ -65,6 +65,7 @@ class PrediccionClima(BaseModel):
     humedad: float
     presion: Optional[float] = 1010
     viento: Optional[float] = 5
+    departamento: Optional[str] = "Lima"
 
 
 class PrediccionResponse(BaseModel):
@@ -91,6 +92,29 @@ class AlertaResponse(BaseModel):
     confirmaciones: int
     timestamp: str
 
+class AlertaGeo(BaseModel):
+    """Alerta con coordenadas geográficas"""
+    tipo: str
+    ubicacion: str  # Texto descriptivo
+    lat: float      # 👈 NUEVO
+    lon: float      # 👈 NUEVO
+    descripcion: str
+    simular_errores: int = 0
+
+class AlertaGeoResponse(BaseModel):
+    """Respuesta con alerta codificada y posición"""
+    alerta_id: str
+    lat: float
+    lon: float
+    tipo: str
+    ubicacion: str
+    descripcion: str
+    estado: str
+    bits_codificados: int
+    errores_corregidos: int
+    firma_valida: bool
+    timestamp: str
+
 
 # ========== INICIALIZACIÓN ==========
 
@@ -111,7 +135,7 @@ app.add_middleware(
 # Variables globales
 grafo: Optional[GrafoRutas] = None
 algoritmo: Optional[AlgoritmoFiabilidad] = None
-modelo_rn: Optional[RedNeuronalSimple] = None
+modelo_rn: Optional[RedNeuronalClima] = None
 clasificador: Optional[ClasificadorRutas] = None
 predictor_clima: Optional[IntegradorSENAMHI] = None
 
@@ -125,15 +149,36 @@ fsm_logistica = MaquinaEstadosLogistica()
 
 # Coordenadas de departamentos
 COORDENADAS = {
-    'Lima': {'lat': -12.0464, 'lon': -77.0428},
-    'Cusco': {'lat': -13.5319, 'lon': -71.9675},
-    'Arequipa': {'lat': -16.4090, 'lon': -71.5375},
-    'Puno': {'lat': -15.8422, 'lon': -70.0199},
-    'Ayacucho': {'lat': -13.1631, 'lon': -74.2236},
-    'Junín': {'lat': -12.0699, 'lon': -75.2048},
-    'Cajamarca': {'lat': -7.1614, 'lon': -78.5126},
-    'San Martín': {'lat': -6.4833, 'lon': -76.3667},
-    'Amazonas': {'lat': -5.7667, 'lon': -77.8667}
+    # COSTA
+    'Lima': {'lat': -12.0464, 'lon': -77.0428, 'region': 'costa'},
+    'Callao': {'lat': -12.0565, 'lon': -77.1181, 'region': 'costa'},
+    'Ica': {'lat': -14.0678, 'lon': -75.7286, 'region': 'costa'},
+    'Arequipa': {'lat': -16.4090, 'lon': -71.5375, 'region': 'costa'},
+    'Moquegua': {'lat': -17.1934, 'lon': -70.9336, 'region': 'costa'},
+    'Tacna': {'lat': -18.0047, 'lon': -70.2453, 'region': 'costa'},
+    'Tumbes': {'lat': -3.5669, 'lon': -80.4515, 'region': 'costa'},
+    'Piura': {'lat': -5.1945, 'lon': -80.6328, 'region': 'costa'},
+    'Lambayeque': {'lat': -6.7011, 'lon': -79.9061, 'region': 'costa'},
+    'La Libertad': {'lat': -8.1116, 'lon': -79.0292, 'region': 'costa'},
+    'Ancash': {'lat': -9.5267, 'lon': -77.5284, 'region': 'costa-sierra'},
+    
+    # SIERRA
+    'Cajamarca': {'lat': -7.1614, 'lon': -78.5126, 'region': 'sierra'},
+    'Huánuco': {'lat': -9.9306, 'lon': -76.2422, 'region': 'sierra'},
+    'Pasco': {'lat': -10.6819, 'lon': -76.2561, 'region': 'sierra'},
+    'Junín': {'lat': -12.0699, 'lon': -75.2048, 'region': 'sierra'},
+    'Huancavelica': {'lat': -12.7872, 'lon': -74.9758, 'region': 'sierra'},
+    'Ayacucho': {'lat': -13.1631, 'lon': -74.2236, 'region': 'sierra'},
+    'Apurímac': {'lat': -13.6344, 'lon': -72.8831, 'region': 'sierra'},  # 👈 Este faltaba!
+    'Cusco': {'lat': -13.5319, 'lon': -71.9675, 'region': 'sierra'},
+    'Puno': {'lat': -15.8422, 'lon': -70.0199, 'region': 'sierra'},
+    
+    # SELVA
+    'Amazonas': {'lat': -5.7667, 'lon': -77.8667, 'region': 'selva'},
+    'San Martín': {'lat': -6.4833, 'lon': -76.3667, 'region': 'selva'},
+    'Loreto': {'lat': -3.7499, 'lon': -73.2540, 'region': 'selva'},
+    'Ucayali': {'lat': -8.3791, 'lon': -74.5539, 'region': 'selva'},
+    'Madre de Dios': {'lat': -12.5935, 'lon': -69.1892, 'region': 'selva'}
 }
 
 
@@ -148,7 +193,7 @@ async def startup_event():
     
     # Cargar grafo
     try:
-        ruta_grafo = "data/grafos/red_peru_completa.json"
+        ruta_grafo = "data/grafos/red_peru_24_departamentos.json"
         if os.path.exists(ruta_grafo):
             grafo = GrafoRutas.cargar_json(ruta_grafo)
             algoritmo = AlgoritmoFiabilidad(grafo)
@@ -165,13 +210,11 @@ async def startup_event():
     # Cargar modelo de red neuronal
     if RED_NEURONAL_DISPONIBLE:
         try:
-            ruta_modelo = "data/modelos/red_neuronal_senamhi.npz"
-            if os.path.exists(ruta_modelo):
-                modelo_rn = RedNeuronalSimple()
-                modelo_rn.cargar_modelo(ruta_modelo)
-                print(f"✅ Red neuronal cargada")
+            modelo_rn = RedNeuronalClima()
+            if modelo_rn.cargar_modelo("data/modelos"):
+                print(f"✅ Red neuronal TensorFlow cargada")
             else:
-                print(f"ℹ️  Red neuronal no cargada (modelo no encontrado)")
+                modelo_rn = None
         except Exception as e:
             print(f"⚠️  Red neuronal no disponible: {e}")
     
@@ -420,58 +463,50 @@ async def comparar_rutas(origen: str, destino: str):
 
 @app.post("/prediccion/clima", response_model=PrediccionResponse, tags=["Predicción"])
 async def predecir_clima(datos: PrediccionClima):
-    """Predice riesgo de bloqueo usando modelo Random Forest entrenado."""
+    """Predice riesgo considerando factores regionales."""
     
-    # Usar modelo entrenado si está disponible
-    if predictor_clima is not None and predictor_clima.modelo is not None:
-        try:
-            pred = predictor_clima.predecir_riesgo(
-                temperatura=datos.temperatura,
-                precipitacion=datos.precipitacion,
-                humedad=datos.humedad,
-                presion=datos.presion or 750,
-                viento=datos.viento or 5
-            )
-            
-            return PrediccionResponse(
-                probabilidad_bloqueo=pred.riesgo_bloqueo,
-                clasificacion=_clasificar_riesgo(pred.riesgo_bloqueo),
-                recomendacion=pred.recomendacion,
-                fiabilidad_ajustada=pred.fiabilidad_ajustada
-            )
-        except Exception as e:
-            print(f"⚠️  Error en predicción: {e}")
-            # Continuar con fallback
+    # Factores de ajuste por región
+    FACTORES_REGIONALES = {
+        'costa': {'lluvia_critica': 30, 'riesgo_base': 0.10},
+        'sierra': {'lluvia_critica': 20, 'riesgo_base': 0.25},
+        'selva': {'lluvia_critica': 50, 'riesgo_base': 0.35},
+        'costa-sierra': {'lluvia_critica': 25, 'riesgo_base': 0.18}
+    }
     
-    # Fallback: predicción simple si no hay modelo
-    prob_bloqueo = 0.0
-    
-    if datos.precipitacion > 30:
-        prob_bloqueo += 0.4
-    if datos.temperatura < 5 or datos.temperatura > 35:
-        prob_bloqueo += 0.3
-    if datos.humedad > 90:
-        prob_bloqueo += 0.2
-    
-    prob_bloqueo = min(1.0, prob_bloqueo)
-    
-    clasificacion = _clasificar_riesgo(prob_bloqueo)
-    
-    if prob_bloqueo > 0.7:
-        recomendacion = "⛔ ALTO RIESGO: Evitar viaje"
-    elif prob_bloqueo > 0.4:
-        recomendacion = "⚠️  RIESGO MODERADO: Precaución"
+    # Obtener región del departamento
+    if datos.departamento in COORDENADAS:
+        # Cargar metadata del departamento desde coordenadas
+        region = COORDENADAS[datos.departamento].get('region', 'costa')
     else:
-        recomendacion = "✅ RIESGO BAJO: Condiciones favorables"
+        region = 'costa'  # Default
     
-    fiabilidad_ajustada = 0.85 * (1 - prob_bloqueo * 0.5)
+    factor_regional = FACTORES_REGIONALES.get(region, FACTORES_REGIONALES['costa'])
     
-    return PrediccionResponse(
-        probabilidad_bloqueo=prob_bloqueo,
-        clasificacion=clasificacion,
-        recomendacion=recomendacion,
-        fiabilidad_ajustada=fiabilidad_ajustada
-    )
+    # Ajustar predicción
+    if predictor_clima and predictor_clima.modelo:
+        pred = predictor_clima.predecir_riesgo(
+            temperatura=datos.temperatura,
+            precipitacion=datos.precipitacion,
+            humedad=datos.humedad,
+            presion=datos.presion or 750,
+            viento=datos.viento or 5
+        )
+        
+        # 👇 AJUSTE REGIONAL
+        riesgo_ajustado = pred.riesgo_bloqueo * (1 + factor_regional['riesgo_base'])
+        
+        return PrediccionResponse(
+            probabilidad_bloqueo=min(1.0, riesgo_ajustado),
+            clasificacion=_clasificar_riesgo(riesgo_ajustado),
+            recomendacion=f"{pred.recomendacion} (Región: {region.capitalize()})",
+            fiabilidad_ajustada=pred.fiabilidad_ajustada
+        )
+    
+    # Fallback con ajuste regional
+    prob_bloqueo = factor_regional['riesgo_base']
+    
+    if datos.precipitacion > factor_regional['lluvia_critica']:
+        prob_bloqueo += 0.4
 
 
 def _clasificar_riesgo(prob: float) -> str:
@@ -532,6 +567,90 @@ async def obtener_alertas_activas():
     ]
     return alertas_activas
 
+@app.post("/alertas/crear-geo", response_model=AlertaGeoResponse, tags=["Alertas"])
+async def crear_alerta_geo(alerta: AlertaGeo):
+    """
+    Crea una alerta geoespacial con Hamming + Firmas.
+    
+    Proceso:
+    1. Recibe coordenadas del clic en mapa
+    2. Codifica mensaje con Hamming
+    3. Firma digitalmente
+    4. Simula errores de transmisión
+    5. Decodifica y corrige
+    6. Guarda en BD y retorna para mostrar en mapa
+    """
+    global contador_alertas
+    contador_alertas += 1
+    
+    # 1. Crear paquete resiliente
+    paquete = protocolo_resiliente.enviar_alerta(
+        tipo=alerta.tipo,
+        ubicacion=alerta.ubicacion,
+        descripcion=alerta.descripcion
+    )
+    
+    # 2. Simular errores
+    mensaje_codificado = paquete['mensaje_codificado']
+    errores_corregidos = 0
+    
+    if alerta.simular_errores > 0:
+        import random
+        posiciones = random.sample(range(len(mensaje_codificado)), alerta.simular_errores)
+        for pos in posiciones:
+            mensaje_codificado[pos] = 1 - mensaje_codificado[pos]
+        paquete['mensaje_codificado'] = mensaje_codificado
+    
+    # 3. Decodificar
+    mensaje_recuperado = protocolo_resiliente.recibir_alerta(paquete, 0)
+    
+    if mensaje_recuperado:
+        errores_corregidos = alerta.simular_errores
+    
+    # 4. Crear alerta en BD
+    alerta_obj = Alerta(
+        id=f"GEO-{contador_alertas:04d}",
+        tipo=alerta.tipo,
+        ubicacion=alerta.ubicacion,
+        descripcion=alerta.descripcion,
+        emisor="USUARIO-WEB",
+        timestamp_creacion=datetime.now()
+    )
+    
+    alertas_db[alerta_obj.id] = alerta_obj
+    
+    # 5. Retornar para mostrar en mapa
+    return AlertaGeoResponse(
+        alerta_id=alerta_obj.id,
+        lat=alerta.lat,
+        lon=alerta.lon,
+        tipo=alerta.tipo,
+        ubicacion=alerta.ubicacion,
+        descripcion=alerta.descripcion,
+        estado=alerta_obj.estado.value,
+        bits_codificados=len(paquete['mensaje_codificado']),
+        errores_corregidos=errores_corregidos,
+        firma_valida=mensaje_recuperado is not None,
+        timestamp=alerta_obj.timestamp_creacion.isoformat()
+    )
+
+@app.get("/alertas/mapa", tags=["Alertas"])
+async def obtener_alertas_mapa():
+    """Retorna todas las alertas para mostrar en el mapa."""
+    return [
+        {
+            'id': alerta.id,
+            'tipo': alerta.tipo,
+            'ubicacion': alerta.ubicacion,
+            'descripcion': alerta.descripcion,
+            'estado': alerta.estado.value,
+            'confianza': alerta.nivel_confianza,
+            # Si tuvieras coordenadas guardadas:
+            # 'lat': alerta.lat,
+            # 'lon': alerta.lon
+        }
+        for alerta in alertas_db.values()
+    ]
 
 @app.get("/test", tags=["Test"])
 async def test_endpoint():

@@ -38,6 +38,54 @@ class ProcesadorSENAMHI:
         
         # Ayacucho
         "qc00156211": {"nombre": "Vilcashuaman", "departamento": "Ayacucho"},
+
+        # Ancash
+        "qc00000441": {"nombre": "Recuay", "departamento": "Ancash"},
+
+        # Apurímac
+        "qc00000677": {"nombre": "Curahuasi", "departamento": "Apurímac"},
+
+        # Huancavelica
+        "qc00000647": {"nombre": "Tunel Cero", "departamento": "Huancavelica"},
+
+        # Huánuco
+        "qc00000404": {"nombre": "Huánuco", "departamento": "Huánuco"},
+
+        #Ica
+        "qc00000700": {"nombre": "San Camilo", "departamento": "Ica"},
+
+        # La Libertad
+        "qc00000374": {"nombre": "Huamachuco", "departamento": "La Libertad"},
+
+        # Lambayeque
+        "qc00000301": {"nombre": "Lambayeque", "departamento": "Lambayeque"},
+
+        # Loreto
+        "qc00000278": {"nombre": "Iquitos", "departamento": "Loreto"},
+
+        # Moquegua
+        "qc00000806": {"nombre": "Moquegua", "departamento": "Moquegua"},
+
+        # Pasco
+        "qc00000552": {"nombre": "Paucartambo", "departamento": "Pasco"},
+
+        # Piura
+        "qc00000207": {"nombre": "Piura", "departamento": "Piura"},
+
+        # Madre de Dios
+        "qc00156306": {"nombre": "Puerto Maldonado", "departamento": "Madre de Dios"},
+
+        # Tacna
+        "qc00000877": {"nombre": "Tarata", "departamento": "Tacna"},
+
+        # Tumbes
+        "qc00000132": {"nombre": "Puerto Pizarro", "departamento": "Tumbes"},
+
+        # Ucayali
+        "qc00000459": {"nombre": "El Maronal", "departamento": "Ucayali"},
+
+        # Callao
+        "qc00000618": {"nombre": "Callao", "departamento": "Callao"},
     }
     
     def leer_archivo_senamhi(self, ruta_archivo: str) -> pd.DataFrame:

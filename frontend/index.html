@@ -65,19 +65,21 @@
 
         .tab-buttons {
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             margin-bottom: 15px;
         }
 
         .tab-btn {
             flex: 1;
-            padding: 10px;
+            min-width: 70px;
+            padding: 10px 5px;
             background: white;
             border: 2px solid #dee2e6;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.85em;
+            font-size: 0.75em;
             transition: all 0.2s;
         }
 
@@ -125,6 +127,12 @@
             color: #555;
         }
 
+        label small {
+            font-weight: normal;
+            color: #999;
+            font-size: 0.9em;
+        }
+
         select, input, textarea {
             width: 100%;
             padding: 8px;
@@ -145,8 +153,13 @@
             transition: transform 0.2s;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .stats-grid {
@@ -275,13 +288,40 @@
             background: #f8d7da;
             color: #721c24;
         }
+
+        /* Estilos para iconos de alertas en el mapa */
+        .alerta-icon {
+            font-size: 24px;
+            text-align: center;
+            line-height: 30px;
+            background: none !important;
+            border: none !important;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🌾 SIAR - Sistema Nacional</h1>
-            <p>Gestión Inteligente de Rutas en 9 Departamentos del Perú</p>
+            <p>Gestión Inteligente de Rutas en 24 Departamentos del Perú</p>
         </header>
 
         <div class="main-content">
@@ -290,6 +330,7 @@
                     <button class="tab-btn active" onclick="switchTab('rutas')">🗺️ Rutas</button>
                     <button class="tab-btn" onclick="switchTab('comparar')">📊 Comparar</button>
                     <button class="tab-btn" onclick="switchTab('clima')">🌦️ Clima</button>
+                    <button class="tab-btn" onclick="switchTab('alertas')">🚨 Alertas</button>
                     <button class="tab-btn" onclick="switchTab('demo')">🔐 Demo</button>
                 </div>
 
@@ -331,6 +372,13 @@
                 <div id="clima" class="tab-content">
                     <div class="card">
                         <h3>Predicción Climática</h3>
+                        
+                        <!-- 👇 NUEVO: Selector de departamento -->
+                        <div class="form-group">
+                            <label>📍 Departamento:</label>
+                            <select id="departamento-clima"></select>
+                        </div>
+                        
                         <div class="form-group">
                             <label>Temperatura (°C):</label>
                             <input type="number" id="temp" value="20" step="0.1">
@@ -347,43 +395,99 @@
                     </div>
                     <div id="resultado-clima"></div>
                 </div>
-            </div>
 
-            <!-- TAB DEMO -->
-            <div id="demo" class="tab-content">
-                <div class="card">
-                    <h3>🛡️ Corrección de Errores</h3>
-                    <p style="font-size: 0.8em; color: #666; margin-bottom: 10px;">
-                        Demuestra Código de Hamming + Firmas Digitales
-                    </p>
-                    
-                    <div class="form-group">
-                        <label>Tipo de Alerta:</label>
-                        <select id="demo-tipo">
-                            <option>BLOQUEO_CARRETERA</option>
-                            <option>EMERGENCIA_MEDICA</option>
-                            <option>CLIMA_ADVERSO</option>
-                        </select>
+                <!-- 👇 NUEVO: TAB ALERTAS -->
+                <div id="alertas" class="tab-content">
+                    <div class="warning-box">
+                        <strong>📍 Crear Alerta en Mapa</strong><br>
+                        <small>
+                            1. Haz clic en el mapa<br>
+                            2. Completa el formulario<br>
+                            3. Sistema codifica con Hamming + Firma
+                        </small>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Ubicación:</label>
-                        <input type="text" id="demo-ubicacion" value="Km 45 Ayacucho-Huanta">
+                    <div class="card">
+                        <h3>Datos de Alerta</h3>
+                        
+                        <div class="form-group">
+                            <label>Tipo:</label>
+                            <select id="alerta-tipo">
+                                <option>BLOQUEO_CARRETERA</option>
+                                <option>DESLIZAMIENTO</option>
+                                <option>PUENTE_CAIDO</option>
+                                <option>LLUVIA_INTENSA</option>
+                                <option>EMERGENCIA_MEDICA</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Ubicación: <small>(detectada del clic)</small></label>
+                            <input type="text" id="alerta-ubicacion" readonly value="(Haz clic en el mapa)">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Coordenadas:</label>
+                            <input type="text" id="alerta-coords" readonly value="">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Descripción:</label>
+                            <textarea id="alerta-desc" rows="2">Reportar incidente</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Simular Errores en Transmisión:</label>
+                            <input type="number" id="alerta-errores" value="2" min="0" max="5">
+                            <small style="display: block; margin-top: 4px; color: #666;">
+                                Hamming puede corregir hasta 1 error por bloque
+                            </small>
+                        </div>
+                        
+                        <button onclick="enviarAlerta()" id="btn-enviar-alerta" disabled>
+                            📡 Enviar Alerta (Codificar + Firmar)
+                        </button>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Descripción:</label>
-                        <textarea id="demo-desc" rows="2">Huaico bloquea vía</textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Simular Errores en Transmisión:</label>
-                        <input type="number" id="demo-errores" value="3" min="0" max="10">
-                    </div>
-                    
-                    <button onclick="demoCodificacion()">🔬 Ejecutar Demo</button>
+                    <div id="resultado-alertas"></div>
                 </div>
-                <div id="resultado-demo"></div>
+
+                <!-- TAB DEMO -->
+                <div id="demo" class="tab-content">
+                    <div class="card">
+                        <h3>🛡️ Corrección de Errores</h3>
+                        <p style="font-size: 0.8em; color: #666; margin-bottom: 10px;">
+                            Demuestra Código de Hamming + Firmas Digitales
+                        </p>
+                        
+                        <div class="form-group">
+                            <label>Tipo de Alerta:</label>
+                            <select id="demo-tipo">
+                                <option>BLOQUEO_CARRETERA</option>
+                                <option>EMERGENCIA_MEDICA</option>
+                                <option>CLIMA_ADVERSO</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Ubicación:</label>
+                            <input type="text" id="demo-ubicacion" value="Km 45 Ayacucho-Huanta">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Descripción:</label>
+                            <textarea id="demo-desc" rows="2">Huaico bloquea vía</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Simular Errores en Transmisión:</label>
+                            <input type="number" id="demo-errores" value="3" min="0" max="10">
+                        </div>
+                        
+                        <button onclick="demoCodificacion()">🔬 Ejecutar Demo</button>
+                    </div>
+                    <div id="resultado-demo"></div>
+                </div>
             </div>
 
             <div class="map-container">
@@ -418,6 +522,11 @@
         const API_BASE = 'http://localhost:8000';
         let map, rutaLayer, marcadoresLayer;
         let COORDENADAS = {};
+        
+        // 👇 NUEVO: Variables para sistema de alertas
+        let puntoSeleccionado = null;
+        let marcadorTemporal = null;
+        let modoAlertaActivo = false;
 
         // Inicializar mapa
         function initMap() {
@@ -441,12 +550,15 @@
 
                 COORDENADAS = coords;
 
-                const selects = ['origen', 'destino', 'origen-comp', 'destino-comp'];
+                // 👇 MODIFICADO: Agregar departamento-clima
+                const selects = ['origen', 'destino', 'origen-comp', 'destino-comp', 'departamento-clima'];
                 selects.forEach(id => {
                     const select = document.getElementById(id);
-                    select.innerHTML = nodos.map(n => 
-                        `<option value="${n}">${n}</option>`
-                    ).join('');
+                    if (select) {
+                        select.innerHTML = nodos.map(n => 
+                            `<option value="${n}">${n}</option>`
+                        ).join('');
+                    }
                 });
 
                 // Agregar marcadores
@@ -477,11 +589,9 @@
                 // Usar geometría real si está disponible
                 let coordsRuta;
                 if (ruta.geometry && ruta.geometry.length > 0) {
-                    // Geometría REAL que sigue carreteras
                     coordsRuta = ruta.geometry;
                     console.log(`✅ Usando ${coordsRuta.length} puntos de geometría real`);
                 } else {
-                    // Fallback: línea recta entre nodos
                     coordsRuta = ruta.nodos.map(n => 
                         [COORDENADAS[n].lat, COORDENADAS[n].lon]
                     );
@@ -499,7 +609,6 @@
 
                 map.fitBounds(polyline.getBounds());
 
-                // Mostrar info
                 document.getElementById('resultado-ruta').innerHTML = `
                     <div class="card">
                         <div class="route-path">${ruta.nodos.join(' → ')}</div>
@@ -545,7 +654,6 @@
                 );
                 const comp = await response.json();
 
-                // Dibujar las 3 rutas con geometría real
                 const rutas = [
                     {data: comp.mas_fiable, color: '#28a745', label: 'Más Fiable'},
                     {data: comp.mas_corta, color: '#007bff', label: 'Más Corta'},
@@ -553,7 +661,6 @@
                 ];
 
                 rutas.forEach(({data, color, label}) => {
-                    // Usar geometría real si está disponible
                     const coords = data.geometry && data.geometry.length > 0 
                         ? data.geometry 
                         : data.nodos.map(n => [COORDENADAS[n].lat, COORDENADAS[n].lon]);
@@ -588,8 +695,9 @@
             }
         }
 
-        // Predecir clima
+        // 👇 MODIFICADO: Predecir clima con departamento
         async function predecirClima() {
+            const departamento = document.getElementById('departamento-clima').value;
             const temp = parseFloat(document.getElementById('temp').value);
             const precip = parseFloat(document.getElementById('precip').value);
             const humedad = parseFloat(document.getElementById('humedad').value);
@@ -599,6 +707,7 @@
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
+                        departamento: departamento,  // 👈 NUEVO
                         temperatura: temp,
                         precipitacion: precip,
                         humedad: humedad
@@ -609,7 +718,7 @@
 
                 document.getElementById('resultado-clima').innerHTML = `
                     <div class="card">
-                        <h3>Resultado</h3>
+                        <h3>Resultado - ${departamento}</h3>
                         <div class="clasificacion ${pred.clasificacion}">
                             ${pred.clasificacion}
                         </div>
@@ -634,13 +743,171 @@
             }
         }
 
-        // Cambiar tab
+        // 👇 NUEVO: Sistema de alertas en mapa
+        function activarModoAlerta() {
+            modoAlertaActivo = true;
+            map.on('click', onMapClick);
+            map.getContainer().style.cursor = 'crosshair';
+            console.log('🖱️ Modo alerta activado - Haz clic en el mapa');
+        }
+
+        function desactivarModoAlerta() {
+            modoAlertaActivo = false;
+            map.off('click', onMapClick);
+            map.getContainer().style.cursor = '';
+            
+            // Limpiar marcador temporal si existe
+            if (marcadorTemporal) {
+                map.removeLayer(marcadorTemporal);
+                marcadorTemporal = null;
+            }
+        }
+
+        function onMapClick(e) {
+            const lat = e.latlng.lat;
+            const lon = e.latlng.lng;
+            
+            puntoSeleccionado = {lat, lon};
+            
+            // Actualizar formulario
+            document.getElementById('alerta-coords').value = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+            document.getElementById('alerta-ubicacion').value = `Punto en mapa (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`;
+            document.getElementById('btn-enviar-alerta').disabled = false;
+            
+            // Marcador temporal
+            if (marcadorTemporal) {
+                map.removeLayer(marcadorTemporal);
+            }
+            
+            marcadorTemporal = L.marker([lat, lon], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41]
+                })
+            }).addTo(map);
+            
+            marcadorTemporal.bindPopup('📍 Nueva alerta aquí').openPopup();
+        }
+
+        async function enviarAlerta() {
+            if (!puntoSeleccionado) {
+                alert('Primero haz clic en el mapa');
+                return;
+            }
+            
+            const tipo = document.getElementById('alerta-tipo').value;
+            const ubicacion = document.getElementById('alerta-ubicacion').value;
+            const descripcion = document.getElementById('alerta-desc').value;
+            const errores = parseInt(document.getElementById('alerta-errores').value);
+            
+            try {
+                const response = await fetch(`${API_BASE}/alertas/crear-geo`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        tipo: tipo,
+                        ubicacion: ubicacion,
+                        lat: puntoSeleccionado.lat,
+                        lon: puntoSeleccionado.lon,
+                        descripcion: descripcion,
+                        simular_errores: errores
+                    })
+                });
+                
+                const alerta = await response.json();
+                
+                // Quitar marcador temporal
+                if (marcadorTemporal) {
+                    map.removeLayer(marcadorTemporal);
+                    marcadorTemporal = null;
+                }
+                
+                // Agregar marcador permanente
+                agregarAlertaMapa(alerta);
+                
+                // Mostrar resultado
+                document.getElementById('resultado-alertas').innerHTML = `
+                    <div class="card" style="background: ${alerta.firma_valida ? '#d4edda' : '#f8d7da'};">
+                        <h4>✅ Alerta Enviada</h4>
+                        <p><strong>ID:</strong> ${alerta.alerta_id}</p>
+                        <p><strong>Tipo:</strong> ${alerta.tipo}</p>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-label">Bits Codificados</div>
+                                <div class="stat-value">${alerta.bits_codificados}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Errores Corregidos</div>
+                                <div class="stat-value">${alerta.errores_corregidos}</div>
+                            </div>
+                        </div>
+                        
+                        <p style="margin-top: 10px; font-size: 0.85em;">
+                            ${alerta.firma_valida ? 
+                                '🔐 Firma válida - Mensaje auténtico' : 
+                                '⚠️ Firma inválida - Mensaje corrupto'}
+                        </p>
+                    </div>
+                `;
+                
+                // Reset
+                puntoSeleccionado = null;
+                document.getElementById('btn-enviar-alerta').disabled = true;
+                document.getElementById('alerta-ubicacion').value = '(Haz clic en el mapa)';
+                document.getElementById('alerta-coords').value = '';
+                
+            } catch (error) {
+                console.error(error);
+                alert('Error al enviar alerta: ' + error.message);
+            }
+        }
+
+        function agregarAlertaMapa(alerta) {
+            const iconos = {
+                'BLOQUEO_CARRETERA': '🚧',
+                'DESLIZAMIENTO': '🏔️',
+                'PUENTE_CAIDO': '🌉',
+                'LLUVIA_INTENSA': '🌧️',
+                'EMERGENCIA_MEDICA': '🚑'
+            };
+            
+            const marcador = L.marker([alerta.lat, alerta.lon], {
+                icon: L.divIcon({
+                    html: iconos[alerta.tipo] || '⚠️',
+                    className: 'alerta-icon',
+                    iconSize: [30, 30]
+                })
+            }).addTo(marcadoresLayer);
+            
+            marcador.bindPopup(`
+                <div style="min-width: 200px;">
+                    <h4 style="margin: 0 0 8px 0;">${iconos[alerta.tipo]} ${alerta.tipo}</h4>
+                    <p style="margin: 5px 0;"><strong>ID:</strong> ${alerta.alerta_id}</p>
+                    <p style="margin: 5px 0;"><strong>Estado:</strong> ${alerta.estado}</p>
+                    <p style="margin: 5px 0;">${alerta.descripcion}</p>
+                    <p style="margin: 8px 0 0 0; font-size: 0.85em; color: #666;">
+                        ${alerta.firma_valida ? '✅ Verificado con Hamming' : '⚠️ Sin verificar'}
+                    </p>
+                </div>
+            `);
+        }
+
+        // 👇 MODIFICADO: Cambiar tab con activación de modo alerta
         function switchTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
             
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
+            
+            // Activar/desactivar modo alerta
+            if (tabName === 'alertas') {
+                activarModoAlerta();
+            } else {
+                desactivarModoAlerta();
+            }
         }
 
         async function demoCodificacion() {
