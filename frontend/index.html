@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIAR - Sistema de Información y Alerta Resiliente</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
     <style>
         * {
             margin: 0;
@@ -19,7 +23,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -44,37 +48,61 @@
             opacity: 0.9;
         }
 
-        .tabs {
-            display: flex;
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 0;
+            height: calc(100vh - 200px);
+        }
+
+        .sidebar {
             background: #f5f5f5;
-            border-bottom: 2px solid #ddd;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 2px solid #ddd;
         }
 
-        .tab {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-            border: none;
-            background: none;
-            font-size: 1em;
-        }
-
-        .tab:hover {
+        .map-container {
+            position: relative;
             background: #e0e0e0;
         }
 
-        .tab.active {
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 15px;
             background: white;
-            border-bottom: 3px solid #667eea;
-            color: #667eea;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .tab:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
         }
 
         .tab-content {
             display: none;
-            padding: 30px;
         }
 
         .tab-content.active {
@@ -82,21 +110,21 @@
         }
 
         .card {
-            background: #f9f9f9;
+            background: white;
             border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .card h3 {
             color: #333;
             margin-bottom: 15px;
-            font-size: 1.4em;
+            font-size: 1.2em;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         label {
@@ -104,30 +132,32 @@
             margin-bottom: 5px;
             font-weight: 600;
             color: #555;
+            font-size: 0.9em;
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 1em;
+            font-size: 0.9em;
         }
 
         textarea {
             resize: vertical;
-            min-height: 80px;
+            min-height: 60px;
         }
 
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1em;
+            font-size: 0.9em;
             font-weight: 600;
+            width: 100%;
             transition: transform 0.2s;
         }
 
@@ -136,107 +166,88 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .result {
+        .map-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
             background: white;
-            border-left: 4px solid #667eea;
             padding: 15px;
-            margin-top: 20px;
-            border-radius: 5px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            max-width: 300px;
+            z-index: 1000;
         }
 
-        .result h4 {
-            color: #667eea;
+        .map-info h4 {
             margin-bottom: 10px;
+            color: #667eea;
         }
 
-        .route-info {
+        .route-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
         }
 
-        .info-item {
+        .stat-item {
             background: #f0f0f0;
-            padding: 10px;
+            padding: 8px;
             border-radius: 5px;
             text-align: center;
         }
 
-        .info-item .label {
-            font-size: 0.85em;
+        .stat-label {
+            font-size: 0.75em;
             color: #666;
-            margin-bottom: 5px;
         }
 
-        .info-item .value {
-            font-size: 1.3em;
+        .stat-value {
+            font-size: 1.2em;
             font-weight: bold;
             color: #333;
         }
 
-        .route-path {
-            background: #e8f4f8;
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
             padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
-            font-size: 1.1em;
-            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
         }
 
-        .alert-item {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
+        .legend h5 {
             margin-bottom: 10px;
-            border-radius: 5px;
+            color: #333;
         }
 
-        .alert-item.confirmada {
-            background: #d4edda;
-            border-left-color: #28a745;
-        }
-
-        .alert-item.resuelta {
-            background: #e0e0e0;
-            border-left-color: #6c757d;
-        }
-
-        .alert-header {
+        .legend-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            gap: 10px;
+            margin-bottom: 5px;
         }
 
-        .alert-id {
-            font-weight: bold;
-            color: #667eea;
+        .legend-color {
+            width: 30px;
+            height: 4px;
+            border-radius: 2px;
         }
 
-        .confidence-bar {
-            background: #e0e0e0;
-            height: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-
-        .confidence-fill {
-            background: linear-gradient(90deg, #ffc107, #28a745);
-            height: 100%;
-            transition: width 0.3s;
+        .alert-marker {
+            background: #ff4444;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 0.85em;
-            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
         .loading {
@@ -248,17 +259,34 @@
         .error {
             background: #f8d7da;
             color: #721c24;
-            padding: 15px;
+            padding: 10px;
             border-radius: 5px;
-            border-left: 4px solid #dc3545;
+            margin-top: 10px;
+            font-size: 0.85em;
         }
 
         .success {
             background: #d4edda;
             color: #155724;
-            padding: 15px;
+            padding: 10px;
             border-radius: 5px;
-            border-left: 4px solid #28a745;
+            margin-top: 10px;
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .sidebar {
+                height: 400px;
+            }
+
+            #map {
+                height: 400px;
+            }
         }
     </style>
 </head>
@@ -269,126 +297,167 @@
             <p>Sistema de Información y Alerta Resiliente para Cooperativas Agrícolas</p>
         </header>
 
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('rutas')">🗺️ Rutas</button>
-            <button class="tab" onclick="switchTab('alertas')">🚨 Alertas</button>
-            <button class="tab" onclick="switchTab('logistica')">📦 Logística</button>
-        </div>
+        <div class="main-content">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('rutas')">🗺️ Calcular Ruta</button>
+                    <button class="tab" onclick="switchTab('alertas')">🚨 Alertas</button>
+                    <button class="tab" onclick="switchTab('comparar')">📊 Comparar Rutas</button>
+                </div>
 
-        <!-- TAB: RUTAS -->
-        <div id="rutas" class="tab-content active">
-            <div class="card">
-                <h3>Calcular Ruta Óptima</h3>
-                <div class="form-group">
-                    <label>Origen:</label>
-                    <select id="origen">
-                        <option value="">Cargando nodos...</option>
-                    </select>
+                <!-- TAB: RUTAS -->
+                <div id="rutas" class="tab-content active">
+                    <div class="card">
+                        <h3>Calcular Ruta Óptima</h3>
+                        <div class="form-group">
+                            <label>Origen:</label>
+                            <select id="origen">
+                                <option value="">Cargando...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Destino:</label>
+                            <select id="destino">
+                                <option value="">Cargando...</option>
+                            </select>
+                        </div>
+                        <button onclick="calcularRuta()">🔍 Buscar Ruta</button>
+                    </div>
+
+                    <div id="resultado-ruta"></div>
                 </div>
-                <div class="form-group">
-                    <label>Destino:</label>
-                    <select id="destino">
-                        <option value="">Cargando nodos...</option>
-                    </select>
+
+                <!-- TAB: ALERTAS -->
+                <div id="alertas" class="tab-content">
+                    <div class="card">
+                        <h3>Crear Alerta</h3>
+                        <div class="form-group">
+                            <label>Tipo:</label>
+                            <select id="tipo-alerta">
+                                <option value="bloqueo_carretera">🚧 Bloqueo</option>
+                                <option value="lluvia_intensa">🌧️ Lluvia</option>
+                                <option value="derrumbe">⛰️ Derrumbe</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ubicación:</label>
+                            <input type="text" id="ubicacion-alerta" placeholder="Ej: Km 32">
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción:</label>
+                            <textarea id="descripcion-alerta"></textarea>
+                        </div>
+                        <button onclick="crearAlerta()">📤 Enviar</button>
+                    </div>
+
+                    <div id="lista-alertas"></div>
                 </div>
-                <button onclick="calcularRuta()">Calcular Ruta</button>
-                <button onclick="compararRutas()" style="margin-left: 10px;">Comparar Criterios</button>
+
+                <!-- TAB: COMPARAR -->
+                <div id="comparar" class="tab-content">
+                    <div class="card">
+                        <h3>Comparar Criterios</h3>
+                        <div class="form-group">
+                            <label>Origen:</label>
+                            <select id="origen-comp">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Destino:</label>
+                            <select id="destino-comp">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        <button onclick="compararRutas()">📊 Comparar</button>
+                    </div>
+
+                    <div id="resultado-comparacion"></div>
+                </div>
             </div>
 
-            <div id="resultado-ruta"></div>
-        </div>
-
-        <!-- TAB: ALERTAS -->
-        <div id="alertas" class="tab-content">
-            <div class="card">
-                <h3>Crear Nueva Alerta</h3>
-                <div class="form-group">
-                    <label>Tipo de Alerta:</label>
-                    <select id="tipo-alerta">
-                        <option value="bloqueo_carretera">Bloqueo de Carretera</option>
-                        <option value="lluvia_intensa">Lluvia Intensa</option>
-                        <option value="derrumbe">Derrumbe</option>
-                        <option value="emergencia_medica">Emergencia Médica</option>
-                        <option value="inundacion">Inundación</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Ubicación:</label>
-                    <input type="text" id="ubicacion-alerta" placeholder="Ej: Ruta Huanta-Sivia Km 32">
-                </div>
-                <div class="form-group">
-                    <label>Descripción:</label>
-                    <textarea id="descripcion-alerta" placeholder="Describe la situación..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Tu ID de Usuario:</label>
-                    <input type="text" id="emisor-alerta" placeholder="Ej: AGR-042">
-                </div>
-                <button onclick="crearAlerta()">Enviar Alerta</button>
-            </div>
-
-            <div class="card">
-                <h3>Alertas Activas</h3>
-                <button onclick="cargarAlertas()">🔄 Actualizar</button>
-                <div id="lista-alertas" style="margin-top: 20px;">
-                    <p class="loading">Cargando alertas...</p>
+            <!-- Mapa -->
+            <div class="map-container">
+                <div id="map"></div>
+                
+                <div class="legend">
+                    <h5>Leyenda</h5>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4CAF50;"></div>
+                        <span>Alta fiabilidad (&gt;80%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #FF9800;"></div>
+                        <span>Media fiabilidad (60-80%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f44336;"></div>
+                        <span>Baja fiabilidad (&lt;60%)</span>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- TAB: LOGÍSTICA -->
-        <div id="logistica" class="tab-content">
-            <div class="card">
-                <h3>Registrar Nuevo Lote</h3>
-                <div class="form-group">
-                    <label>Producto:</label>
-                    <select id="producto-lote">
-                        <option value="quinua">Quinua</option>
-                        <option value="papa">Papa</option>
-                        <option value="cafe">Café</option>
-                        <option value="maiz">Maíz</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Cantidad (kg):</label>
-                    <input type="number" id="cantidad-lote" placeholder="500" min="1">
-                </div>
-                <div class="form-group">
-                    <label>ID Agricultor:</label>
-                    <input type="text" id="agricultor-lote" placeholder="AGR-042">
-                </div>
-                <button onclick="crearLote()">Registrar Lote</button>
-            </div>
-
-            <div id="resultado-lote"></div>
         </div>
     </div>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <script>
         const API_BASE = 'http://localhost:8000';
+        
+        // Coordenadas de ciudades
+        const COORDENADAS = {
+            'Ayacucho': [-13.1631, -74.2236],
+            'Huanta': [-12.9394, -74.2472],
+            'San Miguel': [-13.0122, -73.9808],
+            'Tambo': [-14.7986, -73.9186],
+            'Quinua': [-13.0500, -74.1333],
+            'Sivia': [-12.4500, -73.7833]
+        };
 
-        // Cargar nodos al iniciar
+        // Inicializar mapa
+        const map = L.map('map').setView([-13.1631, -74.2236], 9);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Capas para rutas y marcadores
+        let rutaLayer = L.layerGroup().addTo(map);
+        let marcadoresLayer = L.layerGroup().addTo(map);
+        let alertasLayer = L.layerGroup().addTo(map);
+
+        // Agregar marcadores de ciudades
+        function agregarMarcadoresCiudades() {
+            Object.entries(COORDENADAS).forEach(([ciudad, coords]) => {
+                L.marker(coords)
+                    .bindPopup(`<b>${ciudad}</b>`)
+                    .addTo(marcadoresLayer);
+            });
+        }
+
+        agregarMarcadoresCiudades();
+
+        // Cargar nodos
         async function cargarNodos() {
             try {
                 const response = await fetch(`${API_BASE}/grafos/nodos`);
                 const nodos = await response.json();
                 
-                const origenSelect = document.getElementById('origen');
-                const destinoSelect = document.getElementById('destino');
-                
-                origenSelect.innerHTML = '';
-                destinoSelect.innerHTML = '';
-                
-                nodos.forEach(nodo => {
-                    origenSelect.innerHTML += `<option value="${nodo}">${nodo}</option>`;
-                    destinoSelect.innerHTML += `<option value="${nodo}">${nodo}</option>`;
+                const selects = ['origen', 'destino', 'origen-comp', 'destino-comp'];
+                selects.forEach(id => {
+                    const select = document.getElementById(id);
+                    select.innerHTML = nodos.map(n => 
+                        `<option value="${n}">${n}</option>`
+                    ).join('');
                 });
             } catch (error) {
                 console.error('Error cargando nodos:', error);
             }
         }
 
-        // Calcular ruta
+        // Calcular y mostrar ruta
         async function calcularRuta() {
             const origen = document.getElementById('origen').value;
             const destino = document.getElementById('destino').value;
@@ -398,89 +467,116 @@
                 return;
             }
 
-            const resultado = document.getElementById('resultado-ruta');
-            resultado.innerHTML = '<p class="loading">Calculando ruta...</p>';
+            // Limpiar mapa
+            rutaLayer.clearLayers();
 
             try {
-                const response = await fetch(`${API_BASE}/rutas/calcular?origen=${origen}&destino=${destino}`);
+                const response = await fetch(
+                    `${API_BASE}/rutas/calcular?origen=${origen}&destino=${destino}`
+                );
                 const ruta = await response.json();
 
-                resultado.innerHTML = `
-                    <div class="result">
-                        <h4>🎯 Ruta Más Fiable</h4>
-                        <div class="route-path">
-                            ${ruta.nodos.join(' → ')}
-                        </div>
-                        <div class="route-info">
-                            <div class="info-item">
-                                <div class="label">Distancia</div>
-                                <div class="value">${ruta.distancia_km.toFixed(1)} km</div>
+                // Dibujar ruta en mapa
+                const coordsRuta = ruta.nodos.map(n => COORDENADAS[n]);
+                
+                const color = ruta.fiabilidad > 0.8 ? '#4CAF50' : 
+                             ruta.fiabilidad > 0.6 ? '#FF9800' : '#f44336';
+                
+                const polyline = L.polyline(coordsRuta, {
+                    color: color,
+                    weight: 5,
+                    opacity: 0.7
+                }).addTo(rutaLayer);
+
+                map.fitBounds(polyline.getBounds());
+
+                // Mostrar info
+                document.getElementById('resultado-ruta').innerHTML = `
+                    <div class="card">
+                        <h3>📍 ${ruta.nodos.join(' → ')}</h3>
+                        <div class="route-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Distancia</div>
+                                <div class="stat-value">${ruta.distancia_km.toFixed(1)} km</div>
                             </div>
-                            <div class="info-item">
-                                <div class="label">Fiabilidad</div>
-                                <div class="value">${(ruta.fiabilidad * 100).toFixed(1)}%</div>
+                            <div class="stat-item">
+                                <div class="stat-label">Fiabilidad</div>
+                                <div class="stat-value">${(ruta.fiabilidad * 100).toFixed(1)}%</div>
                             </div>
-                            <div class="info-item">
-                                <div class="label">Tiempo</div>
-                                <div class="value">${ruta.tiempo_min} min</div>
+                            <div class="stat-item">
+                                <div class="stat-label">Tiempo</div>
+                                <div class="stat-value">${ruta.tiempo_min} min</div>
                             </div>
-                            <div class="info-item">
-                                <div class="label">Costo (peso)</div>
-                                <div class="value">${ruta.peso.toFixed(1)}</div>
+                            <div class="stat-item">
+                                <div class="stat-label">Peso</div>
+                                <div class="stat-value">${ruta.peso.toFixed(1)}</div>
                             </div>
                         </div>
                     </div>
                 `;
+
             } catch (error) {
-                resultado.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                document.getElementById('resultado-ruta').innerHTML = 
+                    `<div class="error">Error: ${error.message}</div>`;
             }
         }
 
         // Comparar rutas
         async function compararRutas() {
-            const origen = document.getElementById('origen').value;
-            const destino = document.getElementById('destino').value;
+            const origen = document.getElementById('origen-comp').value;
+            const destino = document.getElementById('destino-comp').value;
             
             if (!origen || !destino) return;
 
-            const resultado = document.getElementById('resultado-ruta');
-            resultado.innerHTML = '<p class="loading">Comparando criterios...</p>';
+            rutaLayer.clearLayers();
 
             try {
-                const response = await fetch(`${API_BASE}/rutas/comparar?origen=${origen}&destino=${destino}`);
+                const response = await fetch(
+                    `${API_BASE}/rutas/comparar?origen=${origen}&destino=${destino}`
+                );
                 const comp = await response.json();
 
-                resultado.innerHTML = `
-                    <div class="result">
-                        <h4>📊 Comparación de Criterios</h4>
-                        
-                        <h5 style="margin-top: 20px;">1️⃣ Ruta Más Fiable</h5>
-                        <div class="route-path">${comp.mas_fiable.nodos.join(' → ')}</div>
-                        <div class="route-info">
-                            <div class="info-item"><div class="label">Distancia</div><div class="value">${comp.mas_fiable.distancia_km.toFixed(1)} km</div></div>
-                            <div class="info-item"><div class="label">Fiabilidad</div><div class="value">${(comp.mas_fiable.fiabilidad * 100).toFixed(1)}%</div></div>
-                            <div class="info-item"><div class="label">Tiempo</div><div class="value">${comp.mas_fiable.tiempo_min} min</div></div>
-                        </div>
+                // Dibujar las 3 rutas
+                const rutas = [
+                    {data: comp.mas_fiable, color: '#4CAF50', label: 'Más Fiable'},
+                    {data: comp.mas_corta, color: '#2196F3', label: 'Más Corta'},
+                    {data: comp.mas_rapida, color: '#FF9800', label: 'Más Rápida'}
+                ];
 
-                        <h5 style="margin-top: 20px;">2️⃣ Ruta Más Corta</h5>
-                        <div class="route-path">${comp.mas_corta.nodos.join(' → ')}</div>
-                        <div class="route-info">
-                            <div class="info-item"><div class="label">Distancia</div><div class="value">${comp.mas_corta.distancia_km.toFixed(1)} km</div></div>
-                            <div class="info-item"><div class="label">Fiabilidad</div><div class="value">${(comp.mas_corta.fiabilidad * 100).toFixed(1)}%</div></div>
-                            <div class="info-item"><div class="label">Tiempo</div><div class="value">${comp.mas_corta.tiempo_min} min</div></div>
-                        </div>
+                rutas.forEach(({data, color, label}) => {
+                    const coords = data.nodos.map(n => COORDENADAS[n]);
+                    L.polyline(coords, {
+                        color: color,
+                        weight: 4,
+                        opacity: 0.7
+                    }).bindPopup(label).addTo(rutaLayer);
+                });
 
-                        <h5 style="margin-top: 20px;">3️⃣ Ruta Más Rápida</h5>
-                        <div class="route-path">${comp.mas_rapida.nodos.join(' → ')}</div>
-                        <div class="route-info">
-                            <div class="info-item"><div class="label">Distancia</div><div class="value">${comp.mas_rapida.distancia_km.toFixed(1)} km</div></div>
-                            <div class="info-item"><div class="label">Fiabilidad</div><div class="value">${(comp.mas_rapida.fiabilidad * 100).toFixed(1)}%</div></div>
-                            <div class="info-item"><div class="label">Tiempo</div><div class="value">${comp.mas_rapida.tiempo_min} min</div></div>
-                        </div>
+                map.fitBounds(L.polyline(
+                    comp.mas_fiable.nodos.map(n => COORDENADAS[n])
+                ).getBounds());
+
+                // Mostrar comparación
+                document.getElementById('resultado-comparacion').innerHTML = `
+                    <div class="card" style="background: #e8f5e9;">
+                        <h4>🏆 Más Fiable</h4>
+                        <p>${comp.mas_fiable.nodos.join(' → ')}</p>
+                        <p><strong>Fiabilidad:</strong> ${(comp.mas_fiable.fiabilidad*100).toFixed(1)}%</p>
+                    </div>
+                    <div class="card" style="background: #e3f2fd;">
+                        <h4>📏 Más Corta</h4>
+                        <p>${comp.mas_corta.nodos.join(' → ')}</p>
+                        <p><strong>Distancia:</strong> ${comp.mas_corta.distancia_km.toFixed(1)} km</p>
+                    </div>
+                    <div class="card" style="background: #fff3e0;">
+                        <h4>⚡ Más Rápida</h4>
+                        <p>${comp.mas_rapida.nodos.join(' → ')}</p>
+                        <p><strong>Tiempo:</strong> ${comp.mas_rapida.tiempo_min} min</p>
                     </div>
                 `;
+
             } catch (error) {
-                resultado.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                console.error(error);
             }
         }
 
@@ -489,97 +585,74 @@
             const tipo = document.getElementById('tipo-alerta').value;
             const ubicacion = document.getElementById('ubicacion-alerta').value;
             const descripcion = document.getElementById('descripcion-alerta').value;
-            const emisor = document.getElementById('emisor-alerta').value;
 
-            if (!ubicacion || !descripcion || !emisor) {
+            if (!ubicacion || !descripcion) {
                 alert('Completa todos los campos');
                 return;
             }
 
             try {
-                const response = await fetch(`${API_BASE}/alertas/crear`, {
+                await fetch(`${API_BASE}/alertas/crear`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tipo, ubicacion, descripcion, emisor })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        tipo, ubicacion, descripcion, 
+                        emisor: 'WEB-USER'
+                    })
                 });
 
-                const alerta = await response.json();
-                
-                alert(`✅ Alerta creada: ${alerta.id}`);
+                alert('✅ Alerta creada');
                 document.getElementById('ubicacion-alerta').value = '';
                 document.getElementById('descripcion-alerta').value = '';
                 cargarAlertas();
+
             } catch (error) {
-                alert(`Error: ${error.message}`);
+                alert('Error: ' + error.message);
             }
         }
 
         // Cargar alertas
         async function cargarAlertas() {
-            const lista = document.getElementById('lista-alertas');
-            lista.innerHTML = '<p class="loading">Cargando...</p>';
-
             try {
                 const response = await fetch(`${API_BASE}/alertas/activas`);
                 const alertas = await response.json();
 
-                if (alertas.length === 0) {
-                    lista.innerHTML = '<p>No hay alertas activas</p>';
-                    return;
-                }
+                alertasLayer.clearLayers();
 
-                lista.innerHTML = alertas.map(a => `
-                    <div class="alert-item ${a.estado}">
-                        <div class="alert-header">
-                            <span class="alert-id">${a.id}</span>
-                            <span>${a.estado}</span>
-                        </div>
-                        <strong>${a.tipo}</strong> - ${a.ubicacion}
-                        <p>${a.descripcion}</p>
-                        <div class="confidence-bar">
-                            <div class="confidence-fill" style="width: ${a.nivel_confianza * 100}%">
-                                ${(a.nivel_confianza * 100).toFixed(0)}% confianza
-                            </div>
-                        </div>
-                        <small>Confirmaciones: ${a.confirmaciones}</small>
-                    </div>
-                `).join('');
-            } catch (error) {
-                lista.innerHTML = `<div class="error">Error: ${error.message}</div>`;
-            }
-        }
-
-        // Crear lote
-        async function crearLote() {
-            const producto = document.getElementById('producto-lote').value;
-            const cantidad_kg = parseFloat(document.getElementById('cantidad-lote').value);
-            const agricultor_id = document.getElementById('agricultor-lote').value;
-
-            if (!cantidad_kg || !agricultor_id) {
-                alert('Completa todos los campos');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/lotes/crear`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ producto, cantidad_kg, agricultor_id })
+                alertas.forEach(alerta => {
+                    // Buscar ciudad mencionada en ubicación
+                    for (const [ciudad, coords] of Object.entries(COORDENADAS)) {
+                        if (alerta.ubicacion.includes(ciudad)) {
+                            L.marker(coords, {
+                                icon: L.divIcon({
+                                    className: 'alert-marker',
+                                    html: '⚠️',
+                                    iconSize: [30, 30]
+                                })
+                            })
+                            .bindPopup(`
+                                <b>${alerta.tipo}</b><br>
+                                ${alerta.ubicacion}<br>
+                                <small>Confianza: ${(alerta.nivel_confianza*100).toFixed(0)}%</small>
+                            `)
+                            .addTo(alertasLayer);
+                            break;
+                        }
+                    }
                 });
 
-                const lote = await response.json();
-                
-                document.getElementById('resultado-lote').innerHTML = `
-                    <div class="success">
-                        ✅ Lote registrado exitosamente
-                        <br><strong>ID:</strong> ${lote.id}
-                        <br><strong>Producto:</strong> ${lote.producto}
-                        <br><strong>Cantidad:</strong> ${lote.cantidad_kg} kg
-                        <br><strong>Estado:</strong> ${lote.estado}
-                    </div>
-                `;
+                document.getElementById('lista-alertas').innerHTML = 
+                    alertas.length === 0 ? '<p class="loading">No hay alertas activas</p>' :
+                    alertas.map(a => `
+                        <div class="card" style="border-left: 4px solid #ff4444;">
+                            <strong>${a.tipo}</strong>
+                            <p style="font-size: 0.85em;">${a.ubicacion}</p>
+                            <p style="font-size: 0.85em;">Confianza: ${(a.nivel_confianza*100).toFixed(0)}%</p>
+                        </div>
+                    `).join('');
+
             } catch (error) {
-                alert(`Error: ${error.message}`);
+                console.error(error);
             }
         }
 

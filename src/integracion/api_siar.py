@@ -31,6 +31,20 @@ from src.unidad3_grafos.maquina_estados import (
     EventoLote
 )
 
+# En tu API o demo
+from src.unidad3_grafos.osm_rutas_peru import IntegradorOSM
+from src.unidad3_grafos.prediccion_climatica import IntegradorSENAMHI
+
+# Obtener rutas reales
+osm = IntegradorOSM()
+grafo = osm.descargar_region("Ayacucho, Peru")
+
+# Predecir riesgo climático
+clima = IntegradorSENAMHI()
+riesgo = clima.predecir_riesgo(temp=15, precip=30, hum=90, pres=1008, viento=10)
+
+# Ajustar fiabilidad de rutas según clima
+grafo.actualizar_fiabilidad("Huanta", "Sivia", riesgo.fiabilidad_ajustada)
 
 # ========== MODELOS PYDANTIC ==========
 
