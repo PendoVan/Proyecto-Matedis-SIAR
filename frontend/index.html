@@ -290,6 +290,7 @@
                     <button class="tab-btn active" onclick="switchTab('rutas')">🗺️ Rutas</button>
                     <button class="tab-btn" onclick="switchTab('comparar')">📊 Comparar</button>
                     <button class="tab-btn" onclick="switchTab('clima')">🌦️ Clima</button>
+                    <button class="tab-btn" onclick="switchTab('demo')">🔐 Demo</button>
                 </div>
 
                 <!-- TAB RUTAS -->
@@ -346,6 +347,43 @@
                     </div>
                     <div id="resultado-clima"></div>
                 </div>
+            </div>
+
+            <!-- TAB DEMO -->
+            <div id="demo" class="tab-content">
+                <div class="card">
+                    <h3>🛡️ Corrección de Errores</h3>
+                    <p style="font-size: 0.8em; color: #666; margin-bottom: 10px;">
+                        Demuestra Código de Hamming + Firmas Digitales
+                    </p>
+                    
+                    <div class="form-group">
+                        <label>Tipo de Alerta:</label>
+                        <select id="demo-tipo">
+                            <option>BLOQUEO_CARRETERA</option>
+                            <option>EMERGENCIA_MEDICA</option>
+                            <option>CLIMA_ADVERSO</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Ubicación:</label>
+                        <input type="text" id="demo-ubicacion" value="Km 45 Ayacucho-Huanta">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Descripción:</label>
+                        <textarea id="demo-desc" rows="2">Huaico bloquea vía</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Simular Errores en Transmisión:</label>
+                        <input type="number" id="demo-errores" value="3" min="0" max="10">
+                    </div>
+                    
+                    <button onclick="demoCodificacion()">🔬 Ejecutar Demo</button>
+                </div>
+                <div id="resultado-demo"></div>
             </div>
 
             <div class="map-container">
@@ -603,6 +641,89 @@
             
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
+        }
+
+        async function demoCodificacion() {
+            const tipo = document.getElementById('demo-tipo').value;
+            const ubicacion = document.getElementById('demo-ubicacion').value;
+            const descripcion = document.getElementById('demo-desc').value;
+            const errores = parseInt(document.getElementById('demo-errores').value);
+
+            try {
+                const response = await fetch(`${API_BASE}/demo/codificacion`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        tipo: tipo,
+                        ubicacion: ubicacion,
+                        descripcion: descripcion,
+                        simular_errores: errores
+                    })
+                });
+
+                const demo = await response.json();
+
+                document.getElementById('resultado-demo').innerHTML = `
+                    <div class="card" style="background: #e7f3ff;">
+                        <h4>📡 Transmisión</h4>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-label">Bits Codificados</div>
+                                <div class="stat-value">${demo.bits_codificados}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Redundancia</div>
+                                <div class="stat-value">${demo.redundancia.toFixed(1)}%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="background: ${errores > 0 ? '#fff3cd' : '#d4edda'};">
+                        <h4>⚠️ Errores</h4>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-label">Simulados</div>
+                                <div class="stat-value">${demo.errores_simulados}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Corregidos</div>
+                                <div class="stat-value">${demo.errores_corregidos}</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.85em; margin-top: 10px; color: #666;">
+                            ${demo.errores_corregidos > 0 ? 
+                                '✅ Errores corregidos automáticamente por Hamming' : 
+                                '✅ Transmisión perfecta'}
+                        </p>
+                    </div>
+
+                    <div class="card" style="background: ${demo.firma_valida ? '#d4edda' : '#f8d7da'};">
+                        <h4>🔐 Verificación</h4>
+                        <p style="font-size: 0.9em;">
+                            <strong>Firma digital:</strong> 
+                            ${demo.firma_valida ? '✅ Válida (mensaje auténtico)' : '❌ Inválida'}
+                        </p>
+                        <p style="font-size: 0.85em; margin-top: 8px; color: #666;">
+                            <strong>Mensaje recuperado:</strong><br>
+                            ${demo.mensaje_recuperado.tipo || 'N/A'}<br>
+                            ${demo.mensaje_recuperado.ubicacion || 'N/A'}
+                        </p>
+                    </div>
+
+                    <div class="alert-item">
+                        <strong>💡 Explicación:</strong><br>
+                        El código de Hamming agregó ${demo.redundancia.toFixed(0)}% de redundancia 
+                        para poder corregir errores automáticamente. Aunque simulamos 
+                        ${demo.errores_simulados} error(es) en la transmisión, 
+                        el sistema los detectó y corrigió, garantizando que el mensaje 
+                        llegue íntegro incluso con señal débil.
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error(error);
+                alert('Error en la demo');
+            }
         }
 
         // Inicializar

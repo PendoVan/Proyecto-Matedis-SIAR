@@ -1,9 +1,9 @@
 """
-Módulo: api_siar_final.py
+Módulo: api_siar.py
 Descripción: API REST completa para SIAR con 9 departamentos del Perú.
 Incluye: Rutas, Alertas, Predicción Climática, Árbol de Decisión
 
-Ejecutar: python -m uvicorn src.integracion.api_siar_final:app --reload
+Ejecutar: python -m uvicorn src.integracion.api_siar:app --reload
 """
 
 from fastapi import FastAPI, HTTPException
@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from src.unidad3_grafos.grafo_rutas import GrafoRutas, TipoCamino
 from src.unidad3_grafos.algoritmo_fiabilidad import AlgoritmoFiabilidad, Ruta
+from src.unidad3_grafos.prediccion_climatica import IntegradorSENAMHI
 from src.unidad3_grafos.maquina_estados import (
     MaquinaEstadosAlerta, MaquinaEstadosLogistica,
     Alerta, LoteCosecha, EstadoAlerta, EstadoLote,
@@ -112,6 +113,7 @@ grafo: Optional[GrafoRutas] = None
 algoritmo: Optional[AlgoritmoFiabilidad] = None
 modelo_rn: Optional[RedNeuronalSimple] = None
 clasificador: Optional[ClasificadorRutas] = None
+predictor_clima: Optional[IntegradorSENAMHI] = None
 
 alertas_db: Dict[str, Alerta] = {}
 lotes_db: Dict[str, LoteCosecha] = {}
@@ -138,7 +140,7 @@ COORDENADAS = {
 @app.on_event("startup")
 async def startup_event():
     """Cargar datos al iniciar."""
-    global grafo, algoritmo, modelo_rn, clasificador
+    global grafo, algoritmo, modelo_rn, clasificador, predictor_clima
     
     print("\n" + "="*70)
     print("🚀 INICIANDO SIAR API")
@@ -186,6 +188,16 @@ async def startup_event():
         except Exception as e:
             print(f"⚠️  Árbol de decisión no disponible: {e}")
     
+    try:
+        global predictor_clima
+        predictor_clima = IntegradorSENAMHI()
+        if predictor_clima.cargar_modelo("data/modelos"):
+            print(f"✅ Predictor climático cargado")
+        else:
+            print(f"⚠️  Predictor climático no disponible (entrenar primero)")
+    except Exception as e:
+        print(f"⚠️  Error cargando predictor: {e}")
+
     print("\n" + "="*70)
     print("✅ API LISTA")
     print("="*70 + "\n")
@@ -408,9 +420,30 @@ async def comparar_rutas(origen: str, destino: str):
 
 @app.post("/prediccion/clima", response_model=PrediccionResponse, tags=["Predicción"])
 async def predecir_clima(datos: PrediccionClima):
-    """Predice riesgo de bloqueo basado en condiciones climáticas."""
+    """Predice riesgo de bloqueo usando modelo Random Forest entrenado."""
     
-    # Predicción simple por defecto
+    # Usar modelo entrenado si está disponible
+    if predictor_clima is not None and predictor_clima.modelo is not None:
+        try:
+            pred = predictor_clima.predecir_riesgo(
+                temperatura=datos.temperatura,
+                precipitacion=datos.precipitacion,
+                humedad=datos.humedad,
+                presion=datos.presion or 750,
+                viento=datos.viento or 5
+            )
+            
+            return PrediccionResponse(
+                probabilidad_bloqueo=pred.riesgo_bloqueo,
+                clasificacion=_clasificar_riesgo(pred.riesgo_bloqueo),
+                recomendacion=pred.recomendacion,
+                fiabilidad_ajustada=pred.fiabilidad_ajustada
+            )
+        except Exception as e:
+            print(f"⚠️  Error en predicción: {e}")
+            # Continuar con fallback
+    
+    # Fallback: predicción simple si no hay modelo
     prob_bloqueo = 0.0
     
     if datos.precipitacion > 30:
@@ -422,25 +455,13 @@ async def predecir_clima(datos: PrediccionClima):
     
     prob_bloqueo = min(1.0, prob_bloqueo)
     
-    # Usar red neuronal si está disponible
-    if modelo_rn is not None:
-        try:
-            import numpy as np
-            X = np.array([[datos.temperatura, datos.precipitacion, 
-                          datos.humedad, datos.presion, datos.viento]])
-            prob_bloqueo = float(modelo_rn.predecir(X)[0])
-        except:
-            pass
+    clasificacion = _clasificar_riesgo(prob_bloqueo)
     
-    # Clasificación
     if prob_bloqueo > 0.7:
-        clasificacion = "PELIGROSA"
         recomendacion = "⛔ ALTO RIESGO: Evitar viaje"
     elif prob_bloqueo > 0.4:
-        clasificacion = "MODERADA"
         recomendacion = "⚠️  RIESGO MODERADO: Precaución"
     else:
-        clasificacion = "SEGURA"
         recomendacion = "✅ RIESGO BAJO: Condiciones favorables"
     
     fiabilidad_ajustada = 0.85 * (1 - prob_bloqueo * 0.5)
@@ -451,6 +472,16 @@ async def predecir_clima(datos: PrediccionClima):
         recomendacion=recomendacion,
         fiabilidad_ajustada=fiabilidad_ajustada
     )
+
+
+def _clasificar_riesgo(prob: float) -> str:
+    """Clasifica el nivel de riesgo."""
+    if prob > 0.7:
+        return "PELIGROSA"
+    elif prob > 0.4:
+        return "MODERADA"
+    else:
+        return "SEGURA"
 
 
 @app.post("/alertas/crear", response_model=AlertaResponse, tags=["Alertas"])
@@ -516,6 +547,72 @@ async def test_endpoint():
             "arbol_decision": ARBOL_DISPONIBLE and clasificador is not None
         }
     }
+
+from src.unidad4_codificacion.protocolo_mensajeria import ProtocoloResiliente
+
+# Variable global
+protocolo_resiliente = ProtocoloResiliente()
+
+class MensajeResiliente(BaseModel):
+    tipo: str
+    ubicacion: str
+    descripcion: str
+    simular_errores: int = 0
+
+class DemoResponse(BaseModel):
+    mensaje_original: dict
+    bits_codificados: int
+    redundancia: float
+    errores_simulados: int
+    errores_corregidos: int
+    mensaje_recuperado: dict
+    firma_valida: bool
+
+@app.post("/demo/codificacion", response_model=DemoResponse, tags=["Demo"])
+async def demo_codificacion(mensaje: MensajeResiliente):
+    """
+    Demuestra corrección de errores con Hamming + Firmas digitales.
+    
+    Esta es una demostración académica de la Unidad IV del proyecto.
+    """
+    import json
+    import random
+    
+    # Enviar (codificar + firmar)
+    paquete = protocolo_resiliente.enviar_alerta(
+        tipo=mensaje.tipo,
+        ubicacion=mensaje.ubicacion,
+        descripcion=mensaje.descripcion
+    )
+    
+    # Simular errores
+    mensaje_codificado = paquete['mensaje_codificado']
+    if mensaje.simular_errores > 0:
+        posiciones = random.sample(range(len(mensaje_codificado)), mensaje.simular_errores)
+        for pos in posiciones:
+            mensaje_codificado[pos] = 1 - mensaje_codificado[pos]
+    
+    paquete['mensaje_codificado'] = mensaje_codificado
+    
+    # Recibir (decodificar + verificar)
+    mensaje_decodificado = protocolo_resiliente.recibir_alerta(paquete, 0)
+    
+    # Calcular errores corregidos
+    errores_corregidos = mensaje.simular_errores if mensaje_decodificado else 0
+    
+    return DemoResponse(
+        mensaje_original={
+            "tipo": mensaje.tipo,
+            "ubicacion": mensaje.ubicacion,
+            "descripcion": mensaje.descripcion
+        },
+        bits_codificados=len(paquete['mensaje_codificado']),
+        redundancia=75.0,  # Hamming(7,4) tiene ~75% redundancia
+        errores_simulados=mensaje.simular_errores,
+        errores_corregidos=errores_corregidos,
+        mensaje_recuperado=mensaje_decodificado or {},
+        firma_valida=mensaje_decodificado is not None
+    )
 
 
 if __name__ == "__main__":

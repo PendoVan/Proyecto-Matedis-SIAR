@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import List
 sys.stdout.reconfigure(encoding='utf-8')
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append('.')
 
 from src.unidad3_grafos.grafo_rutas import GrafoRutas, TipoCamino
 from src.unidad3_grafos.algoritmo_fiabilidad import AlgoritmoFiabilidad
@@ -25,6 +26,7 @@ from src.unidad3_grafos.maquina_estados import (
     EstadoLote,
     EventoLote
 )
+from src.unidad3_grafos.algoritmo_fiabilidad import AlgoritmoFiabilidad
 
 
 def imprimir_seccion(titulo: str):
@@ -235,6 +237,51 @@ def demo_logistica():
     
     print(f"\n✅ Proceso completado exitosamente")
 
+def analizar_ruta_con_clima(grafo, predictor, origen, destino, condiciones_clima):
+    """
+    Analiza ruta considerando clima.
+    
+    Args:
+        grafo: GrafoRutas con la red vial
+        predictor: IntegradorSENAMHI con modelo cargado
+        origen, destino: Ciudades
+        condiciones_clima: dict con temperatura, precipitacion, etc.
+    """
+    print(f"\n{'='*60}")
+    print(f"🔍 Analizando ruta: {origen} → {destino}")
+    print(f"{'='*60}\n")
+    
+    # 1. Calcular ruta óptima
+    algoritmo = AlgoritmoFiabilidad(grafo)
+    ruta = algoritmo.encontrar_ruta_mas_fiable(origen, destino)
+    
+    if not ruta:
+        print("❌ No se encontró ruta")
+        return None
+    
+    print(f"📍 Ruta: {' → '.join(ruta.nodos)}")
+    print(f"   Distancia: {ruta.distancia_total_km:.1f} km")
+    print(f"   Tiempo: {ruta.tiempo_total_min:.0f} min\n")
+    
+    # 2. Analizar clima
+    print("🌦️  Analizando condiciones climáticas...")
+    pred = predictor.predecir_riesgo(**condiciones_clima)
+    
+    print(f"   Riesgo de bloqueo: {pred.riesgo_bloqueo*100:.1f}%")
+    print(f"   {pred.recomendacion}\n")
+    
+    # 3. Ajustar fiabilidad
+    fiabilidad_ajustada = ruta.fiabilidad_acumulada * (1 - pred.riesgo_bloqueo * 0.5)
+    
+    print(f"📊 Resultado final:")
+    print(f"   Fiabilidad base: {ruta.fiabilidad_acumulada*100:.1f}%")
+    print(f"   Fiabilidad ajustada por clima: {fiabilidad_ajustada*100:.1f}%")
+    
+    return {
+        'ruta': ruta,
+        'prediccion': pred,
+        'fiabilidad_ajustada': fiabilidad_ajustada
+    }
 
 def demo_estadisticas():
     """Demo 6: Estadísticas del sistema."""

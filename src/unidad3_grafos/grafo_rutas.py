@@ -233,6 +233,48 @@ class GrafoRutas:
     
     def __repr__(self):
         return f"GrafoRutas(nodos={len(self.nodos)}, aristas={sum(len(v) for v in self.adyacencias.values()) // 2})"
+    
+    def calcular_distancia_haversine(self, lat1: float, lon1: float, 
+                                    lat2: float, lon2: float) -> float:
+        """
+        Calcula distancia real entre dos puntos usando Haversine.
+        Considera la curvatura de la Tierra.
+        """
+        import math
+        R = 6371  # Radio de la Tierra en km
+        
+        lat1_rad = math.radians(lat1)
+        lat2_rad = math.radians(lat2)
+        delta_lat = math.radians(lat2 - lat1)
+        delta_lon = math.radians(lon2 - lon1)
+        
+        a = (math.sin(delta_lat/2)**2 + 
+             math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon/2)**2)
+        c = 2 * math.asin(math.sqrt(a))
+        
+        # Factor 1.3 por curvas de carretera
+        return R * c * 1.3
+    
+    def agregar_camino_con_coordenadas(self, origen: str, destino: str,
+                                      lat1: float, lon1: float,
+                                      lat2: float, lon2: float,
+                                      fiabilidad: float, tipo_camino: TipoCamino,
+                                      riesgo_historico: float = 0.0):
+        """
+        Agrega camino calculando distancia real con Haversine.
+        """
+        distancia_real = self.calcular_distancia_haversine(lat1, lon1, lat2, lon2)
+        
+        self.agregar_camino(
+            origen=origen,
+            destino=destino,
+            distancia_km=distancia_real,
+            fiabilidad=fiabilidad,
+            tipo_camino=tipo_camino,
+            riesgo_historico=riesgo_historico
+        )
+        
+        print(f"✅ Ruta agregada: {origen} → {destino} ({distancia_real:.1f} km)")
 
 
 # ========== EJEMPLO DE USO ==========
