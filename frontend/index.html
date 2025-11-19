@@ -436,10 +436,19 @@
                 );
                 const ruta = await response.json();
 
-                // Dibujar ruta
-                const coordsRuta = ruta.nodos.map(n => 
-                    [COORDENADAS[n].lat, COORDENADAS[n].lon]
-                );
+                // Usar geometría real si está disponible
+                let coordsRuta;
+                if (ruta.geometry && ruta.geometry.length > 0) {
+                    // Geometría REAL que sigue carreteras
+                    coordsRuta = ruta.geometry;
+                    console.log(`✅ Usando ${coordsRuta.length} puntos de geometría real`);
+                } else {
+                    // Fallback: línea recta entre nodos
+                    coordsRuta = ruta.nodos.map(n => 
+                        [COORDENADAS[n].lat, COORDENADAS[n].lon]
+                    );
+                    console.log('⚠️  Usando geometría simple');
+                }
 
                 const color = ruta.fiabilidad > 0.8 ? '#28a745' : 
                              ruta.fiabilidad > 0.6 ? '#ffc107' : '#dc3545';
@@ -498,7 +507,7 @@
                 );
                 const comp = await response.json();
 
-                // Dibujar las 3 rutas
+                // Dibujar las 3 rutas con geometría real
                 const rutas = [
                     {data: comp.mas_fiable, color: '#28a745', label: 'Más Fiable'},
                     {data: comp.mas_corta, color: '#007bff', label: 'Más Corta'},
@@ -506,9 +515,11 @@
                 ];
 
                 rutas.forEach(({data, color, label}) => {
-                    const coords = data.nodos.map(n => 
-                        [COORDENADAS[n].lat, COORDENADAS[n].lon]
-                    );
+                    // Usar geometría real si está disponible
+                    const coords = data.geometry && data.geometry.length > 0 
+                        ? data.geometry 
+                        : data.nodos.map(n => [COORDENADAS[n].lat, COORDENADAS[n].lon]);
+                    
                     L.polyline(coords, {
                         color: color,
                         weight: 4,

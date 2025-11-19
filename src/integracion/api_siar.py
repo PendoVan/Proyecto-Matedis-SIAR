@@ -49,6 +49,7 @@ class RutaResponse(BaseModel):
     tiempo_min: int
     peso: float
     clasificacion: Optional[str] = None
+    geometry: Optional[List[List[float]]] = None  # Coordenadas reales de la ruta
 
 
 class ComparacionRutasResponse(BaseModel):
@@ -285,17 +286,53 @@ async def calcular_ruta(origen: str, destino: str):
         if ruta is None:
             raise HTTPException(status_code=404, detail="No existe ruta")
         
+        # Obtener geometría REAL usando OSRM
+        geometry = None
+        try:
+            import requests
+            
+            # Obtener coordenadas de cada nodo de la ruta
+            coords_str = ";".join([
+                f"{COORDENADAS[nodo]['lon']},{COORDENADAS[nodo]['lat']}" 
+                for nodo in ruta.nodos
+            ])
+            
+            # Llamar a OSRM
+            url = f"http://router.project-osrm.org/route/v1/driving/{coords_str}"
+            params = {'overview': 'full', 'geometries': 'geojson'}
+            
+            response = requests.get(url, params=params, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if data['code'] == 'Ok':
+                    # Convertir lon,lat a lat,lon
+                    coords = data['routes'][0]['geometry']['coordinates']
+                    geometry = [[c[1], c[0]] for c in coords]
+                    print(f"✅ OSRM: {len(geometry)} puntos de geometría")
+        except Exception as e:
+            print(f"⚠️  No se pudo obtener geometría OSRM: {e}")
+            # Fallback: usar coords de nodos
+            geometry = [[COORDENADAS[n]['lat'], COORDENADAS[n]['lon']] for n in ruta.nodos]
+        
         # Clasificar ruta si hay árbol disponible
         clasificacion = None
         if clasificador and clasificador.entrenado:
-            # Usar valores promedio para clasificar
             clase_num, clase_nombre, _ = clasificador.predecir(
                 precipitacion=5, temperatura=20, tipo_camino=2,
                 mes=6, riesgo_historico=0.2, hora=12
             )
             clasificacion = clase_nombre
         
-        return ruta_to_response(ruta, clasificacion)
+        # IMPORTANTE: Crear respuesta con geometry
+        return RutaResponse(
+            nodos=ruta.nodos,
+            distancia_km=ruta.distancia_total_km,
+            fiabilidad=ruta.fiabilidad_acumulada,
+            tiempo_min=ruta.tiempo_total_min,
+            peso=ruta.peso_total,
+            clasificacion=clasificacion,
+            geometry=geometry  # ← ESTO ES LO QUE FALTABA
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -307,11 +344,63 @@ async def comparar_rutas(origen: str, destino: str):
         raise HTTPException(status_code=503, detail="Algoritmo no disponible")
     
     try:
+        import requests
+        
         comparacion = algoritmo.comparar_rutas(origen, destino)
+        
+        # Función auxiliar para obtener geometría
+        def obtener_geometria(ruta):
+            try:
+                coords_str = ";".join([
+                    f"{COORDENADAS[nodo]['lon']},{COORDENADAS[nodo]['lat']}" 
+                    for nodo in ruta.nodos
+                ])
+                
+                url = f"http://router.project-osrm.org/route/v1/driving/{coords_str}"
+                params = {'overview': 'full', 'geometries': 'geojson'}
+                
+                response = requests.get(url, params=params, timeout=10)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data['code'] == 'Ok':
+                        coords = data['routes'][0]['geometry']['coordinates']
+                        return [[c[1], c[0]] for c in coords]
+            except:
+                pass
+            
+            # Fallback
+            return [[COORDENADAS[n]['lat'], COORDENADAS[n]['lon']] for n in ruta.nodos]
+        
+        # Obtener geometría para cada ruta
+        geom_fiable = obtener_geometria(comparacion['mas_fiable'])
+        geom_corta = obtener_geometria(comparacion['mas_corta'])
+        geom_rapida = obtener_geometria(comparacion['mas_rapida'])
+        
         return ComparacionRutasResponse(
-            mas_fiable=ruta_to_response(comparacion['mas_fiable']),
-            mas_corta=ruta_to_response(comparacion['mas_corta']),
-            mas_rapida=ruta_to_response(comparacion['mas_rapida'])
+            mas_fiable=RutaResponse(
+                nodos=comparacion['mas_fiable'].nodos,
+                distancia_km=comparacion['mas_fiable'].distancia_total_km,
+                fiabilidad=comparacion['mas_fiable'].fiabilidad_acumulada,
+                tiempo_min=comparacion['mas_fiable'].tiempo_total_min,
+                peso=comparacion['mas_fiable'].peso_total,
+                geometry=geom_fiable
+            ),
+            mas_corta=RutaResponse(
+                nodos=comparacion['mas_corta'].nodos,
+                distancia_km=comparacion['mas_corta'].distancia_total_km,
+                fiabilidad=comparacion['mas_corta'].fiabilidad_acumulada,
+                tiempo_min=comparacion['mas_corta'].tiempo_total_min,
+                peso=comparacion['mas_corta'].peso_total,
+                geometry=geom_corta
+            ),
+            mas_rapida=RutaResponse(
+                nodos=comparacion['mas_rapida'].nodos,
+                distancia_km=comparacion['mas_rapida'].distancia_total_km,
+                fiabilidad=comparacion['mas_rapida'].fiabilidad_acumulada,
+                tiempo_min=comparacion['mas_rapida'].tiempo_total_min,
+                peso=comparacion['mas_rapida'].peso_total,
+                geometry=geom_rapida
+            )
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
