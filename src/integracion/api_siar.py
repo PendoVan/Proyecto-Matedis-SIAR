@@ -518,6 +518,154 @@ def _clasificar_riesgo(prob: float) -> str:
     else:
         return "SEGURA"
 
+# Agregar estos nuevos endpoints después de los existentes
+
+@app.post("/prediccion/ejecutar-monitor", tags=["Predicción"])
+async def ejecutar_monitor_automatico():
+    """
+    Ejecuta el monitor automático que analiza todas las rutas críticas.
+    Retorna alertas de alto riesgo.
+    """
+    if predictor_clima is None:
+        raise HTTPException(status_code=503, detail="Predictor no disponible")
+    
+    try:
+        alertas_criticas = []
+        detalles = []
+        
+        # Obtener todas las rutas del grafo
+        for origen in grafo.nodos:
+            for arista in grafo.obtener_vecinos(origen):
+                # Simular condiciones climáticas (en producción, obtener datos reales)
+                import random
+                condiciones = {
+                    'temperatura': random.uniform(10, 25),
+                    'precipitacion': random.uniform(0, 50),
+                    'humedad': random.uniform(50, 90),
+                    'presion': random.uniform(1000, 1015),
+                    'viento': random.uniform(0, 30),
+                    'departamento': origen
+                }
+                
+                prediccion = predictor_clima.predecir_riesgo(**condiciones)
+                
+                es_alto_riesgo = prediccion.riesgo_bloqueo > 0.7
+                
+                detalles.append({
+                    'ruta': f"{origen} → {arista.destino}",
+                    'departamento': origen,
+                    'riesgo': f"{prediccion.riesgo_bloqueo*100:.1f}%",
+                    'recomendacion': prediccion.recomendacion,
+                    'es_alto': es_alto_riesgo
+                })
+                
+                if es_alto_riesgo:
+                    alertas_criticas.append({
+                        'origen': origen,
+                        'destino': arista.destino,
+                        'riesgo': prediccion.riesgo_bloqueo
+                    })
+        
+        return {
+            'total_rutas_analizadas': len(detalles),
+            'total_alertas': len(alertas_criticas),
+            'alertas_criticas': alertas_criticas,
+            'detalles': detalles[:50]  # Limitar a 50 para no saturar el frontend
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/grafos/estadisticas", tags=["Grafos"])
+async def obtener_estadisticas_grafo():
+    """Retorna estadísticas completas del grafo."""
+    if grafo is None:
+        raise HTTPException(status_code=503, detail="Grafo no disponible")
+    
+    tipos_camino = {}
+    distancia_total = 0
+    fiabilidad_promedio = 0
+    num_aristas = 0
+    
+    aristas_procesadas = set()
+    for origen, aristas in grafo.adyacencias.items():
+        for arista in aristas:
+            par = tuple(sorted([arista.origen, arista.destino]))
+            if par not in aristas_procesadas:
+                tipos_camino[arista.tipo_camino.value] = tipos_camino.get(arista.tipo_camino.value, 0) + 1
+                distancia_total += arista.distancia_km
+                fiabilidad_promedio += arista.fiabilidad
+                num_aristas += 1
+                aristas_procesadas.add(par)
+    
+    fiabilidad_promedio /= num_aristas if num_aristas > 0 else 1
+    
+    return {
+        'nodos': len(grafo.nodos),
+        'aristas': num_aristas,
+        'distancia_total_km': round(distancia_total, 2),
+        'fiabilidad_promedio': round(fiabilidad_promedio, 4),
+        'tipos_camino': tipos_camino
+    }
+
+
+@app.post("/sistema/demo-completo", tags=["Demo"])
+async def ejecutar_demo_completo():
+    """
+    Ejecuta una demostración completa del sistema.
+    Simula el flujo completo: alerta → ruta → predicción.
+    """
+    try:
+        # 1. Crear una alerta
+        alerta_demo = Alerta(
+            id=f"DEMO-{datetime.now().strftime('%H%M%S')}",
+            tipo="BLOQUEO_CARRETERA",
+            ubicacion="Ruta Demo",
+            descripcion="Demostración del sistema completo",
+            emisor="SISTEMA-DEMO",
+            timestamp_creacion=datetime.now()
+        )
+        
+        # 2. Calcular ruta alternativa
+        origen = list(grafo.nodos)[0] if grafo else "Lima"
+        destino = list(grafo.nodos)[-1] if grafo and len(grafo.nodos) > 1 else "Cusco"
+        
+        ruta = None
+        if algoritmo:
+            ruta = algoritmo.encontrar_ruta_mas_fiable(origen, destino)
+        
+        # 3. Predicción climática
+        prediccion = None
+        if predictor_clima:
+            prediccion = predictor_clima.predecir_riesgo(
+                temperatura=18,
+                precipitacion=10,
+                humedad=70,
+                presion=1010,
+                viento=5,
+                departamento=origen
+            )
+        
+        return {
+            'alerta': {
+                'id': alerta_demo.id,
+                'tipo': alerta_demo.tipo,
+                'estado': alerta_demo.estado.value,
+                'confianza': alerta_demo.nivel_confianza
+            },
+            'ruta': {
+                'nodos': ruta.nodos if ruta else [],
+                'distancia_km': ruta.distancia_total_km if ruta else 0,
+                'fiabilidad': ruta.fiabilidad_acumulada if ruta else 0
+            } if ruta else None,
+            'prediccion': {
+                'riesgo': prediccion.riesgo_bloqueo if prediccion else 0,
+                'recomendacion': prediccion.recomendacion if prediccion else "N/A"
+            } if prediccion else None,
+            'timestamp': datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/alertas/crear", response_model=AlertaResponse, tags=["Alertas"])
 async def crear_alerta(alerta_data: AlertaCreate):
