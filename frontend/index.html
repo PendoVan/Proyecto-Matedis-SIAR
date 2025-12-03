@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIAR - Sistema Nacional de Rutas Inteligentes</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
@@ -26,11 +31,18 @@
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
             padding: 15px 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
 
-        header h1 { font-size: 1.8em; margin-bottom: 5px; }
-        header p { opacity: 0.9; font-size: 0.95em; }
+        header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.95em;
+        }
 
         .main-content {
             display: grid;
@@ -51,7 +63,10 @@
             background: #e9ecef;
         }
 
-        #map { width: 100%; height: 100%; }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
 
         /* Pestañas limpias sin emojis */
         .tab-buttons {
@@ -75,22 +90,29 @@
             transition: all 0.2s;
         }
 
-        .tab-btn:hover { background: #5a6896; }
+        .tab-btn:hover {
+            background: #5a6896;
+        }
 
         .tab-btn.active {
             background: #1e3c72;
             border-bottom: 3px solid #0d1b3eb6;
         }
 
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
 
         .card {
             background: white;
             border-radius: 6px;
             padding: 15px;
             margin-bottom: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             border: 1px solid #dee2e6;
         }
 
@@ -102,7 +124,9 @@
             padding-bottom: 5px;
         }
 
-        .form-group { margin-bottom: 10px; }
+        .form-group {
+            margin-bottom: 10px;
+        }
 
         label {
             display: block;
@@ -112,7 +136,9 @@
             color: #555;
         }
 
-        select, input, textarea {
+        select,
+        input,
+        textarea {
             width: 100%;
             padding: 8px;
             border: 1px solid #ced4da;
@@ -132,8 +158,14 @@
             transition: background 0.2s;
         }
 
-        button:hover:not(:disabled) { background: #1a365d; }
-        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        button:hover:not(:disabled) {
+            background: #1a365d;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
         /* Monitor Automático Estilo Consola */
         .monitor-console {
@@ -148,9 +180,21 @@
             margin-top: 10px;
             border: 1px solid #333;
         }
-        .log-line { margin-bottom: 4px; border-bottom: 1px dashed #333; padding-bottom: 2px; }
-        .log-high { color: #ff4444; font-weight: bold; }
-        .log-info { color: #888; }
+
+        .log-line {
+            margin-bottom: 4px;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 2px;
+        }
+
+        .log-high {
+            color: #ff4444;
+            font-weight: bold;
+        }
+
+        .log-info {
+            color: #888;
+        }
 
         .stats-grid {
             display: grid;
@@ -167,8 +211,17 @@
             border: 1px solid #e9ecef;
         }
 
-        .stat-label { font-size: 0.7em; color: #6c757d; text-transform: uppercase; }
-        .stat-value { font-size: 1.1em; font-weight: bold; color: #333; }
+        .stat-label {
+            font-size: 0.7em;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+        }
 
         /* Badges sin emojis */
         .status-badge {
@@ -178,7 +231,7 @@
             background: white;
             padding: 8px 15px;
             border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             font-size: 0.85em;
             font-weight: 600;
@@ -192,11 +245,22 @@
             background: white;
             padding: 12px;
             border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             z-index: 1000;
         }
-        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 0.8em; }
-        .legend-line { width: 25px; height: 4px; }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+            font-size: 0.8em;
+        }
+
+        .legend-line {
+            width: 25px;
+            height: 4px;
+        }
 
         /* Clases de alerta sin emojis */
         .clasificacion {
@@ -208,9 +272,21 @@
             margin-top: 5px;
             text-transform: uppercase;
         }
-        .clasificacion.SEGURA { background: #d4edda; color: #155724; }
-        .clasificacion.MODERADA { background: #fff3cd; color: #856404; }
-        .clasificacion.PELIGROSA { background: #f8d7da; color: #721c24; }
+
+        .clasificacion.SEGURA {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .clasificacion.MODERADA {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .clasificacion.PELIGROSA {
+            background: #f8d7da;
+            color: #721c24;
+        }
 
         /* Icono CSS puro para alertas en mapa (reemplazo de emojis) */
         .css-icon {
@@ -222,10 +298,11 @@
             font-weight: bold;
             font-size: 12px;
             border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -256,6 +333,14 @@
                             <label>Destino:</label>
                             <select id="destino"></select>
                         </div>
+                        <div class="form-group">
+                            <label>Fecha de Salida:</label>
+                            <input type="date" id="fecha_salida" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Hora de Salida:</label>
+                            <input type="time" id="hora_salida" value="07:00" required>
+                        </div>
                         <button onclick="calcularRuta()">Buscar Ruta</button>
                     </div>
                     <div id="resultado-ruta"></div>
@@ -271,6 +356,14 @@
                         <div class="form-group">
                             <label>Destino:</label>
                             <select id="destino-comp"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Salida:</label>
+                            <input type="date" id="fecha_salida_comp" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Hora de Salida:</label>
+                            <input type="time" id="hora_salida_comp" value="07:00" required>
                         </div>
                         <button onclick="compararRutas()">Comparar</button>
                     </div>
@@ -315,7 +408,7 @@
                         <strong>Crear Alerta</strong><br>
                         <small>Haz clic en el mapa y completa el formulario.</small>
                     </div>
-                    
+
                     <div class="card">
                         <h3>Datos de Alerta</h3>
                         <div class="form-group">
@@ -362,7 +455,7 @@
 
             <div class="map-container">
                 <div id="map"></div>
-                
+
                 <div class="status-badge">
                     SISTEMA ACTIVO
                 </div>
@@ -376,85 +469,92 @@
                         <div class="legend-line" style="background: #ffc107;"></div> Media (60-80%)
                     </div>
                     <div class="legend-item">
-                        <div class="legend-line" style="background: #dc3545;"></div> Baja (<60%)
+                        <div class="legend-line" style="background: #dc3545;"></div> Baja (<60%) </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- ...existing code... -->
+        <!-- ...existing code... -->
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        const API_BASE = 'http://localhost:8000';
-        let map, rutaLayer, marcadoresLayer;
-        let COORDENADAS = {};
-        let puntoSeleccionado = null;
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script>
+            const API_BASE = 'http://localhost:8000';
+            let map, rutaLayer, marcadoresLayer;
+            let COORDENADAS = {};
+            let puntoSeleccionado = null;
 
-        // Inicialización del mapa
-        function initMap() {
-            map = L.map('map').setView([-9.19, -75.0152], 6);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-            rutaLayer = L.layerGroup().addTo(map);
-            marcadoresLayer = L.layerGroup().addTo(map);
-        }
-
-        // Cargar datos iniciales
-        async function cargarDatos() {
-            try {
-                const [nodos, coords, stats] = await Promise.all([
-                    fetch(`${API_BASE}/grafos/nodos`).then(r => r.json()),
-                    fetch(`${API_BASE}/grafos/coordenadas`).then(r => r.json()),
-                    fetch(`${API_BASE}/grafos/estadisticas`).then(r => r.json())
-                ]);
-                
-                COORDENADAS = coords;
-                
-                // Llenar todos los selectores
-                const selects = ['origen', 'destino', 'origen-comp', 'destino-comp', 'departamento-clima'];
-                selects.forEach(id => {
-                    const el = document.getElementById(id);
-                    if(el) el.innerHTML = nodos.map(n => `<option value="${n}">${n}</option>`).join('');
-                });
-                
-                // Mostrar estadísticas en consola
-                console.log('Sistema cargado:', stats);
-                
-            } catch (error) { 
-                console.error('Error cargando datos:', error);
-                alert('Error conectando con el servidor. Asegúrate de que la API esté corriendo en puerto 8000');
+            // Inicialización del mapa
+            function initMap() {
+                map = L.map('map').setView([-9.19, -75.0152], 6);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+                rutaLayer = L.layerGroup().addTo(map);
+                marcadoresLayer = L.layerGroup().addTo(map);
             }
-        }
 
-        // ===== RUTAS =====
-        async function calcularRuta() {
-            const origen = document.getElementById('origen').value;
-            const destino = document.getElementById('destino').value;
-            
-            if (!origen || !destino) {
-                alert('Selecciona origen y destino');
-                return;
+            // Cargar datos iniciales
+            async function cargarDatos() {
+                try {
+                    const [nodos, coords, stats] = await Promise.all([
+                        fetch(`${API_BASE}/grafos/nodos`).then(r => r.json()),
+                        fetch(`${API_BASE}/grafos/coordenadas`).then(r => r.json()),
+                        fetch(`${API_BASE}/grafos/estadisticas`).then(r => r.json())
+                    ]);
+
+                    COORDENADAS = coords;
+
+                    // Llenar todos los selectores
+                    const selects = ['origen', 'destino', 'origen-comp', 'destino-comp', 'departamento-clima'];
+                    selects.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.innerHTML = nodos.map(n => `<option value="${n}">${n}</option>`).join('');
+                    });
+
+                    // Mostrar estadísticas en consola
+                    console.log('Sistema cargado:', stats);
+
+                } catch (error) {
+                    console.error('Error cargando datos:', error);
+                    alert('Error conectando con el servidor. Asegúrate de que la API esté corriendo en puerto 8000');
+                }
             }
-            
-            rutaLayer.clearLayers();
-            
-            try {
-                const res = await fetch(`${API_BASE}/rutas/calcular?origen=${origen}&destino=${destino}`);
-                const ruta = await res.json();
-                
-                const color = ruta.fiabilidad > 0.8 ? '#28a745' : ruta.fiabilidad > 0.6 ? '#ffc107' : '#dc3545';
-                
-                // Usar geometría si existe, sino usar nodos
-                let points = ruta.geometry 
-                    ? ruta.geometry 
-                    : ruta.nodos.map(n => [COORDENADAS[n].lat, COORDENADAS[n].lon]);
 
-                L.polyline(points, { color: color, weight: 5 }).addTo(rutaLayer);
-                map.fitBounds(L.polyline(points).getBounds());
+            // ===== RUTAS =====
+            async function calcularRuta() {
+                const origen = document.getElementById('origen').value;
+                const destino = document.getElementById('destino').value;
+                const fechaSalida = document.getElementById('fecha_salida').value;
+                const horaSalida = document.getElementById('hora_salida').value;
 
-                document.getElementById('resultado-ruta').innerHTML = `
+                if (!origen || !destino) {
+                    alert('Selecciona origen y destino');
+                    return;
+                }
+
+                rutaLayer.clearLayers();
+
+                try {
+                    // Construir URL con parámetros opcionales
+                    let url = `${API_BASE}/rutas/calcular?origen=${origen}&destino=${destino}`;
+                    if (fechaSalida && horaSalida) {
+                        url += `&fecha_salida=${fechaSalida}&hora_salida=${horaSalida}`;
+                    }
+
+                    const res = await fetch(url);
+                    const ruta = await res.json();
+
+                    const color = ruta.fiabilidad > 0.8 ? '#28a745' : ruta.fiabilidad > 0.6 ? '#ffc107' : '#dc3545';
+
+                    // Usar geometría si existe, sino usar nodos
+                    let points = ruta.geometry
+                        ? ruta.geometry
+                        : ruta.nodos.map(n => [COORDENADAS[n].lat, COORDENADAS[n].lon]);
+
+                    L.polyline(points, { color: color, weight: 5 }).addTo(rutaLayer);
+                    map.fitBounds(L.polyline(points).getBounds());
+
+                    document.getElementById('resultado-ruta').innerHTML = `
                     <div class="card">
                         <div style="background:#e7f3ff; padding:5px; font-size:0.9em; text-align:center; margin-bottom:5px;">
                             ${ruta.nodos.join(' → ')}
@@ -466,11 +566,15 @@
                             </div>
                             <div class="stat-box">
                                 <div class="stat-label">Fiabilidad</div>
-                                <div class="stat-value">${(ruta.fiabilidad*100).toFixed(1)}%</div>
+                                <div class="stat-value">${(ruta.fiabilidad * 100).toFixed(1)}%</div>
                             </div>
                             <div class="stat-box">
                                 <div class="stat-label">Tiempo</div>
                                 <div class="stat-value">${ruta.tiempo_min.toFixed(0)} min</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Peso Total</div>
+                                <div class="stat-value" style="font-size:0.9em;">${ruta.peso.toFixed(1)}</div>
                             </div>
                             <div class="stat-box">
                                 <div class="stat-label">Clasificación</div>
@@ -478,110 +582,118 @@
                             </div>
                         </div>
                     </div>`;
-            } catch (e) { 
-                console.error(e);
-                alert("Error calculando ruta. Verifica que ambos departamentos estén conectados."); 
+                } catch (e) {
+                    console.error(e);
+                    alert("Error calculando ruta. Verifica que ambos departamentos estén conectados.");
+                }
             }
-        }
 
-        // ===== COMPARAR RUTAS =====
-        async function compararRutas() {
-            const origen = document.getElementById('origen-comp').value;
-            const destino = document.getElementById('destino-comp').value;
-            
-            if (!origen || !destino) {
-                alert('Selecciona origen y destino');
-                return;
-            }
-            
-            rutaLayer.clearLayers();
-            
-            try {
-                const res = await fetch(`${API_BASE}/rutas/comparar?origen=${origen}&destino=${destino}`);
-                const comp = await res.json();
-                
-                // Dibujar las 3 rutas
-                const rutas = [
-                    { data: comp.mas_fiable, color: '#28a745', nombre: 'Más Fiable' },
-                    { data: comp.mas_corta, color: '#007bff', nombre: 'Más Corta' },
-                    { data: comp.mas_rapida, color: '#ffc107', nombre: 'Más Rápida' }
-                ];
-                
-                rutas.forEach(({data, color, nombre}) => {
-                    let points = data.geometry 
-                        ? data.geometry 
-                        : data.nodos.map(n => [COORDENADAS[n].lat, COORDENADAS[n].lon]);
-                    
-                    L.polyline(points, { 
-                        color: color, 
-                        weight: 4, 
-                        opacity: 0.7,
-                        dashArray: nombre === 'Más Fiable' ? null : '10, 5'
-                    }).bindPopup(`<b>${nombre}</b><br>
-                        ${data.distancia_km.toFixed(0)} km | ${(data.fiabilidad*100).toFixed(1)}%`
-                    ).addTo(rutaLayer);
-                });
-                
-                // Centrar mapa
-                let allPoints = rutas.flatMap(r => 
-                    r.data.geometry || r.data.nodos.map(n => [COORDENADAS[n].lat, COORDENADAS[n].lon])
-                );
-                map.fitBounds(L.polyline(allPoints).getBounds());
-                
-                document.getElementById('resultado-comp').innerHTML = `
+            // ===== COMPARAR RUTAS =====
+            async function compararRutas() {
+                const origen = document.getElementById('origen-comp').value;
+                const destino = document.getElementById('destino-comp').value;
+                const fechaSalida = document.getElementById('fecha_salida_comp').value;
+                const horaSalida = document.getElementById('hora_salida_comp').value;
+
+                if (!origen || !destino) {
+                    alert('Selecciona origen y destino');
+                    return;
+                }
+
+                rutaLayer.clearLayers();
+
+                try {
+                    // Construir URL con parámetros opcionales
+                    let url = `${API_BASE}/rutas/comparar?origen=${origen}&destino=${destino}`;
+                    if (fechaSalida && horaSalida) {
+                        url += `&fecha_salida=${fechaSalida}&hora_salida=${horaSalida}`;
+                    }
+
+                    const res = await fetch(url);
+                    const comp = await res.json();
+
+                    // Dibujar las 3 rutas
+                    const rutas = [
+                        { data: comp.mas_fiable, color: '#28a745', nombre: 'Más Fiable' },
+                        { data: comp.mas_corta, color: '#007bff', nombre: 'Más Corta' },
+                        { data: comp.mas_rapida, color: '#ffc107', nombre: 'Más Rápida' }
+                    ];
+
+                    rutas.forEach(({ data, color, nombre }) => {
+                        let points = data.geometry
+                            ? data.geometry
+                            : data.nodos.map(n => [COORDENADAS[n].lat, COORDENADAS[n].lon]);
+
+                        L.polyline(points, {
+                            color: color,
+                            weight: 4,
+                            opacity: 0.7,
+                            dashArray: nombre === 'Más Fiable' ? null : '10, 5'
+                        }).bindPopup(`<b>${nombre}</b><br>
+                        ${data.distancia_km.toFixed(0)} km | ${(data.fiabilidad * 100).toFixed(1)}%`
+                        ).addTo(rutaLayer);
+                    });
+
+                    // Centrar mapa
+                    let allPoints = rutas.flatMap(r =>
+                        r.data.geometry || r.data.nodos.map(n => [COORDENADAS[n].lat, COORDENADAS[n].lon])
+                    );
+                    map.fitBounds(L.polyline(allPoints).getBounds());
+
+                    document.getElementById('resultado-comp').innerHTML = `
                     <div class="card">
                         <h3>Comparación de Criterios</h3>
-                        ${rutas.map(({data, color, nombre}) => `
+                        ${rutas.map(({ data, color, nombre }) => `
                             <div style="border-left: 4px solid ${color}; padding-left: 8px; margin-bottom: 10px;">
                                 <strong>${nombre}</strong><br>
                                 <small>
                                     ${data.nodos.join(' → ')}<br>
                                     ${data.distancia_km.toFixed(0)} km | 
-                                    ${(data.fiabilidad*100).toFixed(1)}% | 
+                                    ${(data.fiabilidad * 100).toFixed(1)}% | 
                                     ${data.tiempo_min.toFixed(0)} min
                                 </small>
                             </div>
                         `).join('')}
                     </div>`;
-                
-            } catch (e) {
-                console.error(e);
-                alert("Error comparando rutas");
-            }
-        }
 
-        // ===== PREDICCIÓN CLIMÁTICA MANUAL =====
-        async function predecirClima() {
-            const dept = document.getElementById('departamento-clima').value;
-            const temp = parseFloat(document.getElementById('temp').value);
-            const precip = parseFloat(document.getElementById('precip').value);
-            const hum = parseFloat(document.getElementById('humedad').value);
-            
-            if (isNaN(temp) || isNaN(precip) || isNaN(hum)) {
-                alert('Completa todos los campos con valores numéricos');
-                return;
+                } catch (e) {
+                    console.error(e);
+                    alert("Error comparando rutas");
+                }
             }
-            
-            try {
-                const res = await fetch(`${API_BASE}/prediccion/clima`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        departamento: dept,
-                        temperatura: temp,
-                        precipitacion: precip,
-                        humedad: hum,
-                        presion: 1010,
-                        viento: 10
-                    })
-                });
-                
-                const pred = await res.json();
-                
-                const colorRiesgo = pred.riesgo_bloqueo > 0.7 ? '#dc3545' : 
-                                   pred.riesgo_bloqueo > 0.4 ? '#ffc107' : '#28a745';
-                
-                document.getElementById('resultado-clima').innerHTML = `
+
+            // ===== PREDICCIÓN CLIMÁTICA MANUAL =====
+            async function predecirClima() {
+                const dept = document.getElementById('departamento-clima').value;
+                const temp = parseFloat(document.getElementById('temp').value);
+                const precip = parseFloat(document.getElementById('precip').value);
+                const hum = parseFloat(document.getElementById('humedad').value);
+
+                if (isNaN(temp) || isNaN(precip) || isNaN(hum)) {
+                    alert('Completa todos los campos con valores numéricos');
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`${API_BASE}/prediccion/clima`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            departamento: dept,
+                            temperatura: temp,
+                            precipitacion: precip,
+                            humedad: hum,
+                            presion: 1010,
+                            viento: 10
+                        })
+                    });
+
+                    const pred = await res.json();
+
+                    const colorRiesgo = pred.riesgo_bloqueo > 0.7 ? '#dc3545' :
+                        pred.riesgo_bloqueo > 0.4 ? '#ffc107' : '#28a745';
+
+                    document.getElementById('resultado-clima').innerHTML = `
                     <div class="card" style="border-left: 4px solid ${colorRiesgo};">
                         <h3>Resultado de Predicción</h3>
                         <p><strong>Departamento:</strong> ${dept}</p>
@@ -597,119 +709,119 @@
                             </small>
                         </div>
                     </div>`;
-                    
-            } catch (e) {
-                console.error(e);
-                alert("Error en predicción. Asegúrate de que el modelo esté entrenado.");
-            }
-        }
 
-        // ===== MONITOR AUTOMÁTICO =====
-        async function ejecutarMonitor() {
-            const consoleDiv = document.getElementById('monitor-console');
-            const btn = event.target;
-            
-            btn.disabled = true;
-            btn.textContent = 'Escaneando...';
-            consoleDiv.innerHTML = '<div class="log-info">> Iniciando escaneo de red...</div>';
-            
-            try {
-                const res = await fetch(`${API_BASE}/prediccion/ejecutar-monitor`, { method: 'POST' });
-                const data = await res.json();
-                
-                consoleDiv.innerHTML += `<div class="log-info">> Analizadas ${data.total_rutas_analizadas} rutas</div>`;
-                
-                data.detalles.forEach(item => {
-                    const cssClass = item.es_alto ? 'log-high' : '';
-                    const prefix = item.es_alto ? '[ALERTA]' : '[INFO]';
-                    
-                    consoleDiv.innerHTML += `
+                } catch (e) {
+                    console.error(e);
+                    alert("Error en predicción. Asegúrate de que el modelo esté entrenado.");
+                }
+            }
+
+            // ===== MONITOR AUTOMÁTICO =====
+            async function ejecutarMonitor() {
+                const consoleDiv = document.getElementById('monitor-console');
+                const btn = event.target;
+
+                btn.disabled = true;
+                btn.textContent = 'Escaneando...';
+                consoleDiv.innerHTML = '<div class="log-info">> Iniciando escaneo de red...</div>';
+
+                try {
+                    const res = await fetch(`${API_BASE}/prediccion/ejecutar-monitor`, { method: 'POST' });
+                    const data = await res.json();
+
+                    consoleDiv.innerHTML += `<div class="log-info">> Analizadas ${data.total_rutas_analizadas} rutas</div>`;
+
+                    data.detalles.forEach(item => {
+                        const cssClass = item.es_alto ? 'log-high' : '';
+                        const prefix = item.es_alto ? '[ALERTA]' : '[INFO]';
+
+                        consoleDiv.innerHTML += `
                         <div class="log-line ${cssClass}">
                             ${prefix} ${item.ruta}<br>
                             &nbsp;&nbsp; Dept: ${item.departamento} | Riesgo: ${item.riesgo}<br>
                             &nbsp;&nbsp; ${item.recomendacion}
                         </div>
                     `;
-                });
-                
-                consoleDiv.innerHTML += `<div class="log-info">> Escaneo finalizado. Alertas críticas: ${data.total_alertas}</div>`;
-                consoleDiv.scrollTop = consoleDiv.scrollHeight;
-                
-            } catch (e) {
-                console.error(e);
-                consoleDiv.innerHTML += `<div class="log-high">> ERROR: ${e.message}</div>`;
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Iniciar Escaneo de Red';
-            }
-        }
+                    });
 
-        // ===== ALERTAS =====
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(tab).classList.add('active');
-            
-            // Activar/desactivar modo clic en mapa
-            if(tab === 'alertas') {
-                map.on('click', onMapClick);
-                map.getContainer().style.cursor = 'crosshair';
-            } else {
-                map.off('click', onMapClick);
-                map.getContainer().style.cursor = '';
-                puntoSeleccionado = null;
-                document.getElementById('btn-enviar-alerta').disabled = true;
-            }
-        }
+                    consoleDiv.innerHTML += `<div class="log-info">> Escaneo finalizado. Alertas críticas: ${data.total_alertas}</div>`;
+                    consoleDiv.scrollTop = consoleDiv.scrollHeight;
 
-        function onMapClick(e) {
-            puntoSeleccionado = e.latlng;
-            document.getElementById('alerta-ubicacion').value = 
-                `Lat: ${e.latlng.lat.toFixed(4)}, Lon: ${e.latlng.lng.toFixed(4)}`;
-            document.getElementById('btn-enviar-alerta').disabled = false;
-        }
-
-        async function enviarAlerta() {
-            if (!puntoSeleccionado) {
-                alert('Primero haz clic en el mapa para seleccionar ubicación');
-                return;
+                } catch (e) {
+                    console.error(e);
+                    consoleDiv.innerHTML += `<div class="log-high">> ERROR: ${e.message}</div>`;
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Iniciar Escaneo de Red';
+                }
             }
-            
-            const tipo = document.getElementById('alerta-tipo').value;
-            const desc = document.getElementById('alerta-desc').value;
-            
-            try {
-                const res = await fetch(`${API_BASE}/alertas/crear-geo`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        tipo: tipo,
-                        ubicacion: document.getElementById('alerta-ubicacion').value,
-                        descripcion: desc,
-                        lat: puntoSeleccionado.lat,
-                        lon: puntoSeleccionado.lng,
-                        simular_errores: 1
-                    })
-                });
-                
-                const alerta = await res.json();
-                
-                // Agregar marcador al mapa
-                L.marker(puntoSeleccionado, {
-                    icon: L.divIcon({
-                        className: 'custom-div-icon',
-                        html: `<div class="css-icon" style="width:30px;height:30px;background:#dc3545;line-height:30px;">!</div>`,
-                        iconSize: [30, 30],
-                        iconAnchor: [15, 15]
-                    })
-                }).bindPopup(`
+
+            // ===== ALERTAS =====
+            function switchTab(tab) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                event.target.classList.add('active');
+                document.getElementById(tab).classList.add('active');
+
+                // Activar/desactivar modo clic en mapa
+                if (tab === 'alertas') {
+                    map.on('click', onMapClick);
+                    map.getContainer().style.cursor = 'crosshair';
+                } else {
+                    map.off('click', onMapClick);
+                    map.getContainer().style.cursor = '';
+                    puntoSeleccionado = null;
+                    document.getElementById('btn-enviar-alerta').disabled = true;
+                }
+            }
+
+            function onMapClick(e) {
+                puntoSeleccionado = e.latlng;
+                document.getElementById('alerta-ubicacion').value =
+                    `Lat: ${e.latlng.lat.toFixed(4)}, Lon: ${e.latlng.lng.toFixed(4)}`;
+                document.getElementById('btn-enviar-alerta').disabled = false;
+            }
+
+            async function enviarAlerta() {
+                if (!puntoSeleccionado) {
+                    alert('Primero haz clic en el mapa para seleccionar ubicación');
+                    return;
+                }
+
+                const tipo = document.getElementById('alerta-tipo').value;
+                const desc = document.getElementById('alerta-desc').value;
+
+                try {
+                    const res = await fetch(`${API_BASE}/alertas/crear-geo`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            tipo: tipo,
+                            ubicacion: document.getElementById('alerta-ubicacion').value,
+                            descripcion: desc,
+                            lat: puntoSeleccionado.lat,
+                            lon: puntoSeleccionado.lng,
+                            simular_errores: 1
+                        })
+                    });
+
+                    const alerta = await res.json();
+
+                    // Agregar marcador al mapa
+                    L.marker(puntoSeleccionado, {
+                        icon: L.divIcon({
+                            className: 'custom-div-icon',
+                            html: `<div class="css-icon" style="width:30px;height:30px;background:#dc3545;line-height:30px;">!</div>`,
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15]
+                        })
+                    }).bindPopup(`
                     <b>${tipo}</b><br>
                     ${desc}<br>
                     <small>ID: ${alerta.alerta_id}</small>
                 `).addTo(marcadoresLayer);
-                
-                document.getElementById('resultado-alertas').innerHTML = `
+
+                    document.getElementById('resultado-alertas').innerHTML = `
                     <div class="card" style="background:#d4edda; border-left: 4px solid #28a745;">
                         <h3>✓ Alerta Enviada</h3>
                         <p><strong>ID:</strong> ${alerta.alerta_id}</p>
@@ -720,38 +832,38 @@
                             Errores corregidos: ${alerta.errores_corregidos}
                         </p>
                     </div>`;
-                
-                // Resetear formulario
-                puntoSeleccionado = null;
-                document.getElementById('btn-enviar-alerta').disabled = true;
-                document.getElementById('alerta-ubicacion').value = '(Haz clic en el mapa)';
-                
-            } catch (e) {
-                console.error(e);
-                alert('Error enviando alerta');
-            }
-        }
 
-        // ===== DEMO HAMMING =====
-        async function demoCodificacion() {
-            const ubicacion = document.getElementById('demo-ubicacion').value;
-            const errores = parseInt(document.getElementById('demo-errores').value) || 0;
-            
-            try {
-                const res = await fetch(`${API_BASE}/demo/codificacion`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        tipo: 'DEMO_HAMMING',
-                        ubicacion: ubicacion,
-                        descripcion: 'Demostración de corrección de errores',
-                        simular_errores: errores
-                    })
-                });
-                
-                const demo = await res.json();
-                
-                document.getElementById('resultado-demo').innerHTML = `
+                    // Resetear formulario
+                    puntoSeleccionado = null;
+                    document.getElementById('btn-enviar-alerta').disabled = true;
+                    document.getElementById('alerta-ubicacion').value = '(Haz clic en el mapa)';
+
+                } catch (e) {
+                    console.error(e);
+                    alert('Error enviando alerta');
+                }
+            }
+
+            // ===== DEMO HAMMING =====
+            async function demoCodificacion() {
+                const ubicacion = document.getElementById('demo-ubicacion').value;
+                const errores = parseInt(document.getElementById('demo-errores').value) || 0;
+
+                try {
+                    const res = await fetch(`${API_BASE}/demo/codificacion`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            tipo: 'DEMO_HAMMING',
+                            ubicacion: ubicacion,
+                            descripcion: 'Demostración de corrección de errores',
+                            simular_errores: errores
+                        })
+                    });
+
+                    const demo = await res.json();
+
+                    document.getElementById('resultado-demo').innerHTML = `
                     <div class="card" style="background:#e7f3ff;">
                         <h3>Resultado de Demo</h3>
                         <div style="font-family: monospace; font-size: 0.85em;">
@@ -774,18 +886,19 @@
                                 <strong>Firma Digital:</strong> ${demo.firma_valida ? 'VÁLIDA ✓' : 'INVÁLIDA ✗'}</p>
                         </div>
                     </div>`;
-                    
-            } catch (e) {
-                console.error(e);
-                alert('Error ejecutando demo');
-            }
-        }
 
-        // Inicialización
-        window.onload = () => { 
-            initMap(); 
-            cargarDatos(); 
-        };
-    </script>
-    </body>
+                } catch (e) {
+                    console.error(e);
+                    alert('Error ejecutando demo');
+                }
+            }
+
+            // Inicialización
+            window.onload = () => {
+                initMap();
+                cargarDatos();
+            };
+        </script>
+</body>
+
 </html>

@@ -166,6 +166,104 @@ class IntegradorSENAMHI:
             estacion=estacion
         )
     
+    def predecir_riesgo_por_fecha(self, departamento: str, fecha_salida: datetime,
+                                   ruta_csv: str = "data/clima/senamhi_procesado.csv") -> float:
+        """
+        Predice riesgo de bloqueo para una fecha específica.
+        
+        Args:
+            departamento: Nombre del departamento
+            fecha_salida: Fecha de salida (datetime object)
+            ruta_csv: Ruta al archivo CSV con datos históricos
+            
+        Returns:
+            float: Probabilidad de bloqueo (0.0 a 1.0)
+        """
+        if self.modelo is None:
+            raise ValueError("⚠️  Primero entrena o carga el modelo")
+        
+        # Extraer mes y día del año de la fecha de salida
+        mes = fecha_salida.month
+        dia_año = fecha_salida.timetuple().tm_yday
+        
+        # Calcular features temporales
+        sin_dia = np.sin(2 * np.pi * dia_año / 365.25)
+        cos_dia = np.cos(2 * np.pi * dia_año / 365.25)
+        epoca_lluvias = int(mes in [11, 12, 1, 2, 3])
+        
+        try:
+            # Cargar datos históricos y obtener promedio mensual
+            df = pd.read_csv(ruta_csv, parse_dates=['fecha'])
+            
+            # Filtrar por departamento si existe la columna
+            if 'departamento' in df.columns or 'estacion' in df.columns:
+                col_dept = 'departamento' if 'departamento' in df.columns else 'estacion'
+                df_dept = df[df[col_dept].str.contains(departamento, case=False, na=False)]
+                if len(df_dept) == 0:
+                    # Si no hay datos del departamento, usar promedio general
+                    df_dept = df
+            else:
+                df_dept = df
+            
+            # Filtrar por mes y calcular promedios
+            df_dept['mes'] = pd.to_datetime(df_dept['fecha']).dt.month
+            df_mes = df_dept[df_dept['mes'] == mes]
+            
+            if len(df_mes) > 0:
+                # Usar promedios del mes específico
+                temperatura = df_mes['temperatura'].mean()
+                precipitacion = df_mes['precipitacion'].mean()
+                humedad = df_mes['humedad'].mean()
+                presion = df_mes['presion'].mean() if 'presion' in df_mes.columns else 750
+                viento = df_mes['viento'].mean() if 'viento' in df_mes.columns else 5
+            else:
+                # Fallback: usar valores neutros
+                temperatura = 18
+                precipitacion = 10
+                humedad = 70
+                presion = 750
+                viento = 5
+                
+        except Exception as e:
+            print(f"⚠️  No se pudieron cargar datos históricos: {e}")
+            print(f"   Usando valores por defecto para el mes {mes}")
+            # Valores por defecto según época del año
+            if epoca_lluvias:
+                temperatura = 16
+                precipitacion = 25
+                humedad = 85
+            else:
+                temperatura = 20
+                precipitacion = 5
+                humedad = 65
+            presion = 750
+            viento = 8
+        
+        # Construir vector de features (debe coincidir con el entrenamiento)
+        # Features: temperatura, precipitacion, humedad, presion, viento,
+        #           mes, sin_dia, cos_dia, epoca_lluvias,
+        #           precipitacion_ma7, temperatura_ma7, precip_acum_7d
+        X = np.array([[
+            temperatura,
+            precipitacion,
+            humedad,
+            presion,
+            viento,
+            mes,
+            sin_dia,
+            cos_dia,
+            epoca_lluvias,
+            precipitacion,  # Aproximación: usar mismo valor para MA7
+            temperatura,    # Aproximación: usar mismo valor para MA7
+            precipitacion * 3  # Aproximación: acumulado 7 días
+        ]])
+        
+        # Escalar y predecir
+        X_scaled = self.scaler.transform(X)
+        prob_bloqueo = float(self.modelo.predict_proba(X_scaled)[0][1])
+        
+        return prob_bloqueo
+    
     def guardar_modelo(self, ruta: str = "data/modelos"):
         """Guarda modelo"""
         os.makedirs(ruta, exist_ok=True)

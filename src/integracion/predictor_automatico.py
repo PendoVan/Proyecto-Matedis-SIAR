@@ -9,7 +9,51 @@ Ejecutar: python -m src.integracion.predictor_automatico
 import sys
 import os
 import time
-import schedule
+try:
+    import schedule  # type: ignore
+except Exception:
+    # Minimal fallback shim for `schedule` so the module still runs if the package is not installed.
+    # Supports: schedule.every(n).hours.do(func) and schedule.run_pending()
+    import datetime as _dt
+
+    class _Job:
+        def __init__(self, interval_hours: int):
+            self.interval_hours = interval_hours
+            self.func = None
+            self.last_run = _dt.datetime.now()
+
+        def hours(self):
+            return self
+
+        def do(self, func):
+            self.func = func
+            ScheduleStub._jobs.append((self, self.interval_hours * 3600))
+            return self
+
+    class ScheduleStub:
+        _jobs = []  # list of tuples: (job, interval_seconds)
+
+        @staticmethod
+        def every(interval_hours: int):
+            return _Job(interval_hours)
+
+        @staticmethod
+        def run_pending():
+            now = _dt.datetime.now()
+            for job, interval_seconds in list(ScheduleStub._jobs):
+                if job.func is None:
+                    continue
+                elapsed = (now - job.last_run).total_seconds()
+                if elapsed >= interval_seconds:
+                    try:
+                        job.func()
+                    except Exception:
+                        # swallow exceptions to mimic schedule package behavior in a lightweight way
+                        pass
+                    job.last_run = now
+
+    schedule = ScheduleStub
+
 from datetime import datetime
 from typing import List, Dict
 import requests

@@ -395,6 +395,70 @@
       "tipo_camino": "afirmado",
       "riesgo_historico": 0.45,
       "tiempo_estimado_min": 720
+    },
+    {
+      "comentario": "🔥 NUEVAS CONEXIONES DIRECTAS - Rutas alternativas",
+      "origen": "Lambayeque",
+      "destino": "Amazonas",
+      "distancia_km": 450,
+      "fiabilidad": 0.75,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.28,
+      "tiempo_estimado_min": 450
+    },
+    {
+      "origen": "Lambayeque",
+      "destino": "Cajamarca",
+      "distancia_km": 260,
+      "fiabilidad": 0.82,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.2,
+      "tiempo_estimado_min": 260
+    },
+    {
+      "origen": "Amazonas",
+      "destino": "Loreto",
+      "distancia_km": 540,
+      "fiabilidad": 0.63,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.42,
+      "tiempo_estimado_min": 540
+    },
+    {
+      "origen": "Huánuco",
+      "destino": "San Martín",
+      "distancia_km": 390,
+      "fiabilidad": 0.72,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.32,
+      "tiempo_estimado_min": 390
+    },
+    {
+      "origen": "Pasco",
+      "destino": "Ucayali",
+      "distancia_km": 410,
+      "fiabilidad": 0.68,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.38,
+      "tiempo_estimado_min": 410
+    },
+    {
+      "origen": "Junín",
+      "destino": "Ucayali",
+      "distancia_km": 465,
+      "fiabilidad": 0.69,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.36,
+      "tiempo_estimado_min": 465
+    },
+    {
+      "origen": "Junín",
+      "destino": "Ayacucho",
+      "distancia_km": 380,
+      "fiabilidad": 0.76,
+      "tipo_camino": "afirmado",
+      "riesgo_historico": 0.28,
+      "tiempo_estimado_min": 380
     }
   ]
 }

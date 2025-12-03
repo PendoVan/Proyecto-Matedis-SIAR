@@ -18,7 +18,8 @@ import json
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from src.unidad3_grafos.grafo_rutas import GrafoRutas, TipoCamino
-from src.unidad3_grafos.algoritmo_fiabilidad import AlgoritmoFiabilidad, Ruta
+from src.unidad3_grafos.algoritmo_fiabilidad import Ruta
+from src.unidad3_grafos.algoritmo_fiabilidad_geo import AlgoritmoFiabilidadGeo  # 🔥 Algoritmo con penalización geográfica
 from src.unidad3_grafos.prediccion_climatica import IntegradorSENAMHI
 from src.unidad3_grafos.maquina_estados import (
     MaquinaEstadosAlerta, MaquinaEstadosLogistica,
@@ -134,7 +135,7 @@ app.add_middleware(
 
 # Variables globales
 grafo: Optional[GrafoRutas] = None
-algoritmo: Optional[AlgoritmoFiabilidad] = None
+algoritmo: Optional[AlgoritmoFiabilidadGeo] = None
 modelo_rn: Optional[RedNeuronalClima] = None
 clasificador: Optional[ClasificadorRutas] = None
 predictor_clima: Optional[IntegradorSENAMHI] = None
@@ -196,16 +197,16 @@ async def startup_event():
         ruta_grafo = "data/grafos/red_peru_24_departamentos.json"
         if os.path.exists(ruta_grafo):
             grafo = GrafoRutas.cargar_json(ruta_grafo)
-            algoritmo = AlgoritmoFiabilidad(grafo)
+            algoritmo = AlgoritmoFiabilidadGeo(grafo, COORDENADAS)  # 🔥 Usa algoritmo con optimización geográfica
             print(f"✅ Grafo cargado: {len(grafo.nodos)} departamentos")
         else:
             print(f"⚠️  Creando grafo de ejemplo...")
             grafo = crear_grafo_ejemplo()
-            algoritmo = AlgoritmoFiabilidad(grafo)
+            algoritmo = AlgoritmoFiabilidadGeo(grafo, COORDENADAS)  # 🔥 Usa algoritmo con optimización geográfica
     except Exception as e:
         print(f"❌ Error cargando grafo: {e}")
         grafo = crear_grafo_ejemplo()
-        algoritmo = AlgoritmoFiabilidad(grafo)
+        algoritmo = AlgoritmoFiabilidadGeo(grafo, COORDENADAS)  # 🔥 Usa algoritmo con optimización geográfica
     
     # Cargar modelo de red neuronal
     if RED_NEURONAL_DISPONIBLE:

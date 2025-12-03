@@ -83,7 +83,7 @@ class IntegradorOSM:
             
         except Exception as e:
             print(f"❌ Error descargando región: {e}")
-            return None
+            return None # type: ignore
     
     def descargar_ruta_entre_ciudades(self, origen: str, destino: str) -> nx.MultiDiGraph:
         """
