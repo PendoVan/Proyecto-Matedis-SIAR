@@ -103,6 +103,97 @@ class CodificadorHamming:
         
         return datos, error_detectado, posicion_error
     
+    def decodificar_bloque_detallado(self, codigo: List[int]) -> dict:
+        """
+        Decodifica un bloque con información detallada para visualización.
+        
+        Args:
+            codigo: Lista de 7 bits recibidos
+            
+        Returns:
+            Diccionario con pasos detallados del proceso de decodificación
+        """
+        if len(codigo) != 7:
+            raise ValueError("Hamming(7,4) requiere exactamente 7 bits")
+        
+        # Paso 1: Bits recibidos
+        resultado = {
+            'bits_recibidos': codigo.copy(),
+            'bits_datos': codigo[:4],
+            'bits_paridad': codigo[4:7],
+            'pasos': []
+        }
+        
+        # Paso 2: Calcular síndrome
+        sindrome = [0, 0, 0]
+        calculos_sindrome = []
+        
+        for i in range(3):
+            suma = 0
+            calculo = []
+            for j in range(7):
+                if self.H[i][j] == 1:
+                    suma += codigo[j]
+                    calculo.append(f"b{j+1}")
+            sindrome[i] = suma % 2
+            calculos_sindrome.append({
+                'bit_paridad': i + 1,
+                'bits_verificados': calculo,
+                'suma': suma,
+                'resultado': sindrome[i]
+            })
+        
+        resultado['sindrome'] = sindrome
+        resultado['calculos_sindrome'] = calculos_sindrome
+        resultado['pasos'].append({
+            'numero': 1,
+            'descripcion': 'Cálculo del síndrome de error',
+            'sindrome': sindrome
+        })
+        
+        # Paso 3: Detectar error
+        error_detectado = any(sindrome)
+        posicion_error = 0
+        
+        if error_detectado:
+            posicion_error = sindrome[0] * 4 + sindrome[1] * 2 + sindrome[2]
+            resultado['pasos'].append({
+                'numero': 2,
+                'descripcion': f'Error detectado en posición {posicion_error}',
+                'posicion_error': posicion_error,
+                'bit_erroneo': codigo[posicion_error - 1]
+            })
+            
+            # Paso 4: Corregir error
+            codigo_corregido = codigo.copy()
+            bit_original = codigo[posicion_error - 1]
+            codigo_corregido[posicion_error - 1] = 1 - bit_original
+            
+            resultado['pasos'].append({
+                'numero': 3,
+                'descripcion': f'Corrigiendo bit en posición {posicion_error}',
+                'bit_antes': bit_original,
+                'bit_despues': codigo_corregido[posicion_error - 1]
+            })
+        else:
+            codigo_corregido = codigo
+            resultado['pasos'].append({
+                'numero': 2,
+                'descripcion': 'No se detectaron errores - mensaje íntegro'
+            })
+        
+        # Extraer datos finales
+        datos = codigo_corregido[:4]
+        
+        resultado.update({
+            'error_detectado': error_detectado,
+            'posicion_error': posicion_error,
+            'codigo_corregido': codigo_corregido,
+            'datos_finales': datos
+        })
+        
+        return resultado
+    
     def codificar_texto(self, texto: str) -> List[int]:
         """
         Codifica un texto completo usando Hamming.

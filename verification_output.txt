@@ -1,0 +1,10 @@
+
+--- Caso 1: Enero (Temporada de Lluvias) ---
+Probabilidad de Bloqueo: 5.23%
+Recomendación: ✅ RIESGO MÍNIMO (Región: sierra)
+
+--- Caso 2: Julio (Temporada Seca) ---
+Probabilidad de Bloqueo: 3.52%
+Recomendación: ✅ RIESGO MÍNIMO (Región: sierra)
+
+✅ Lógica correcta: Mayor riesgo en Enero que en Julio

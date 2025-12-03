@@ -58,22 +58,21 @@ class AlgoritmoFiabilidad:
     def __init__(self, grafo: GrafoRutas):
         self.grafo = grafo
     
-    def encontrar_ruta_mas_fiable(self, origen: str, destino: str) -> Optional[Ruta]:
+    def encontrar_ruta_mas_fiable(self, origen: str, destino: str, 
+                                 fecha_salida=None, hora_salida=None,
+                                 predictor_clima=None) -> Optional[Ruta]:
         """
         Encuentra la ruta con menor peso de fiabilidad entre origen y destino.
         
         Args:
             origen: Nodo de inicio
             destino: Nodo de llegada
+            fecha_salida: Fecha para predicción climática
+            hora_salida: Hora para tráfico
+            predictor_clima: Instancia de IntegradorSENAMHI
             
         Returns:
             Objeto Ruta con el camino óptimo, o None si no existe camino
-            
-        Algoritmo:
-            1. Inicializar distancias a infinito, excepto origen = 0
-            2. Usar min-heap para procesar nodos por peso mínimo
-            3. Para cada nodo, explorar vecinos y actualizar si encontramos mejor camino
-            4. Reconstruir ruta desde el destino hacia el origen
         """
         if origen not in self.grafo.nodos:
             raise ValueError(f"Nodo origen '{origen}' no existe en el grafo")
@@ -112,7 +111,16 @@ class AlgoritmoFiabilidad:
                     continue
                 
                 # Calcular nuevo peso
-                peso_arista = arista.calcular_peso_fiabilidad()
+                if predictor_clima and fecha_salida:
+                    peso_arista = arista.calcular_peso_dinamico(fecha_salida, hora_salida, predictor_clima)
+                else:
+                    peso_arista = arista.calcular_peso_fiabilidad()
+                
+                # Aplicar penalización geográfica si existe (AlgoritmoFiabilidadGeo)
+                if hasattr(self, 'calcular_penalizacion_direccion'):
+                    penalizacion = self.calcular_penalizacion_direccion(nodo_actual, vecino, destino)
+                    peso_arista *= (1 + penalizacion)
+
                 nuevo_peso = peso_actual + peso_arista
                 
                 # Si encontramos un camino mejor, actualizar
@@ -179,17 +187,18 @@ class AlgoritmoFiabilidad:
         mejor_ruta = self.encontrar_ruta_mas_fiable(origen, destino)
         return [mejor_ruta] if mejor_ruta else []
     
-    def comparar_rutas(self, origen: str, destino: str) -> Dict:
+    def comparar_rutas(self, origen: str, destino: str, 
+                      fecha_salida=None, hora_salida=None, predictor_clima=None) -> Dict:
         """
         Compara diferentes criterios de optimización:
-        - Ruta más fiable
+        - Ruta más fiable (considera clima y tráfico si hay fecha/hora)
         - Ruta más corta (distancia)
         - Ruta más rápida (tiempo)
         
         Útil para la presentación del proyecto.
         """
         # Ruta más fiable (ya implementada)
-        ruta_fiable = self.encontrar_ruta_mas_fiable(origen, destino)
+        ruta_fiable = self.encontrar_ruta_mas_fiable(origen, destino, fecha_salida, hora_salida, predictor_clima)
         
         # Ruta más corta (Dijkstra clásico con peso = distancia)
         ruta_corta = self._dijkstra_clasico(origen, destino, criterio='distancia')

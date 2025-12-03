@@ -31,55 +31,55 @@
       "origen": "Tumbes",
       "destino": "Piura",
       "distancia_km": 285,
-      "fiabilidad": 0.92,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.08,
-      "tiempo_estimado_min": 285
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 213
     },
     {
       "origen": "Piura",
       "destino": "Lambayeque",
       "distancia_km": 210,
-      "fiabilidad": 0.93,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.07,
-      "tiempo_estimado_min": 210
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 157
     },
     {
       "origen": "Lambayeque",
       "destino": "La Libertad",
       "distancia_km": 205,
-      "fiabilidad": 0.94,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.06,
-      "tiempo_estimado_min": 205
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 153
     },
     {
       "origen": "La Libertad",
       "destino": "Ancash",
       "distancia_km": 302,
-      "fiabilidad": 0.9,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.1,
-      "tiempo_estimado_min": 302
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 226
     },
     {
       "origen": "Ancash",
       "destino": "Lima",
       "distancia_km": 408,
-      "fiabilidad": 0.93,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.07,
-      "tiempo_estimado_min": 408
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 306
     },
     {
       "origen": "Lima",
       "destino": "Callao",
       "distancia_km": 15,
-      "fiabilidad": 0.98,
-      "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.02,
-      "tiempo_estimado_min": 15
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 22
     },
     {
       "origen": "Lima",
@@ -88,377 +88,1332 @@
       "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
       "riesgo_historico": 0.05,
-      "tiempo_estimado_min": 305
+      "tiempo_estimado_min": 228
     },
     {
       "origen": "Ica",
       "destino": "Arequipa",
       "distancia_km": 710,
-      "fiabilidad": 0.92,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.08,
-      "tiempo_estimado_min": 710
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 532
     },
     {
       "origen": "Arequipa",
       "destino": "Moquegua",
       "distancia_km": 215,
-      "fiabilidad": 0.91,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.09,
-      "tiempo_estimado_min": 215
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 161
     },
     {
       "origen": "Moquegua",
       "destino": "Tacna",
       "distancia_km": 145,
-      "fiabilidad": 0.93,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.07,
-      "tiempo_estimado_min": 145
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 108
     },
     {
       "origen": "Lima",
       "destino": "Junín",
       "distancia_km": 305,
-      "fiabilidad": 0.85,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.18,
-      "tiempo_estimado_min": 305
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 228
     },
     {
       "origen": "Lima",
       "destino": "Huancavelica",
       "distancia_km": 450,
-      "fiabilidad": 0.78,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.25,
-      "tiempo_estimado_min": 450
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 675
     },
     {
       "origen": "Lima",
       "destino": "Ayacucho",
       "distancia_km": 565,
-      "fiabilidad": 0.82,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.22,
-      "tiempo_estimado_min": 565
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 847
     },
     {
       "origen": "La Libertad",
       "destino": "Cajamarca",
       "distancia_km": 300,
-      "fiabilidad": 0.86,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.16,
-      "tiempo_estimado_min": 300
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 225
     },
     {
       "origen": "Ancash",
       "destino": "Huánuco",
       "distancia_km": 155,
-      "fiabilidad": 0.83,
-      "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.2,
-      "tiempo_estimado_min": 155
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 232
     },
     {
       "origen": "Ica",
       "destino": "Huancavelica",
       "distancia_km": 265,
-      "fiabilidad": 0.75,
-      "tipo_camino": "afirmado",
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
       "riesgo_historico": 0.3,
-      "tiempo_estimado_min": 265
+      "tiempo_estimado_min": 397
     },
     {
       "origen": "Cajamarca",
       "destino": "Huánuco",
       "distancia_km": 445,
-      "fiabilidad": 0.74,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.32,
-      "tiempo_estimado_min": 445
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 667
     },
     {
       "origen": "Huánuco",
       "destino": "Pasco",
       "distancia_km": 105,
-      "fiabilidad": 0.8,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.22,
-      "tiempo_estimado_min": 105
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 78
     },
     {
       "origen": "Pasco",
       "destino": "Junín",
       "distancia_km": 130,
-      "fiabilidad": 0.85,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.18,
-      "tiempo_estimado_min": 130
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 97
     },
     {
       "origen": "Junín",
       "destino": "Huancavelica",
       "distancia_km": 147,
-      "fiabilidad": 0.78,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.26,
-      "tiempo_estimado_min": 147
+      "fiabilidad": 0.95,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 110
     },
     {
       "origen": "Huancavelica",
       "destino": "Ayacucho",
       "distancia_km": 245,
-      "fiabilidad": 0.72,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.32,
-      "tiempo_estimado_min": 244
+      "fiabilidad": 0.95,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 183
     },
     {
       "origen": "Ayacucho",
       "destino": "Apurímac",
       "distancia_km": 265,
-      "fiabilidad": 0.7,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.35,
-      "tiempo_estimado_min": 265
+      "fiabilidad": 0.95,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 198
     },
     {
       "origen": "Apurímac",
       "destino": "Cusco",
       "distancia_km": 195,
-      "fiabilidad": 0.82,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.2,
-      "tiempo_estimado_min": 195
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 146
     },
     {
       "origen": "Arequipa",
       "destino": "Puno",
       "distancia_km": 295,
-      "fiabilidad": 0.88,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.15,
-      "tiempo_estimado_min": 295
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 221
     },
     {
       "origen": "Cusco",
       "destino": "Puno",
       "distancia_km": 389,
-      "fiabilidad": 0.9,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.12,
-      "tiempo_estimado_min": 389
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 291
     },
     {
       "origen": "Cusco",
       "destino": "Arequipa",
       "distancia_km": 510,
-      "fiabilidad": 0.86,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.16,
-      "tiempo_estimado_min": 510
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 382
     },
     {
       "origen": "Ayacucho",
       "destino": "Cusco",
       "distancia_km": 590,
-      "fiabilidad": 0.75,
-      "tipo_camino": "afirmado",
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
       "riesgo_historico": 0.3,
-      "tiempo_estimado_min": 590
+      "tiempo_estimado_min": 885
     },
     {
       "origen": "Junín",
       "destino": "Cusco",
       "distancia_km": 595,
-      "fiabilidad": 0.78,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.28,
-      "tiempo_estimado_min": 595
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 892
     },
     {
       "origen": "Puno",
       "destino": "Ayacucho",
       "distancia_km": 680,
-      "fiabilidad": 0.72,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.32,
-      "tiempo_estimado_min": 680
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1020
     },
     {
       "origen": "Tumbes",
       "destino": "Loreto",
       "distancia_km": 1450,
       "fiabilidad": 0.6,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.45,
-      "tiempo_estimado_min": 1450
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 2175
     },
     {
       "origen": "Piura",
       "destino": "Cajamarca",
       "distancia_km": 365,
-      "fiabilidad": 0.81,
-      "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.22,
-      "tiempo_estimado_min": 365
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 547
     },
     {
       "origen": "Cajamarca",
       "destino": "Amazonas",
       "distancia_km": 318,
-      "fiabilidad": 0.7,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.35,
-      "tiempo_estimado_min": 318
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 477
     },
     {
       "origen": "Amazonas",
       "destino": "San Martín",
       "distancia_km": 420,
-      "fiabilidad": 0.65,
-      "tipo_camino": "trocha",
-      "riesgo_historico": 0.42,
-      "tiempo_estimado_min": 420
+      "fiabilidad": 0.95,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 315
     },
     {
       "origen": "Cajamarca",
       "destino": "San Martín",
       "distancia_km": 520,
-      "fiabilidad": 0.68,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.38,
-      "tiempo_estimado_min": 520
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 780
     },
     {
       "origen": "San Martín",
       "destino": "Loreto",
       "distancia_km": 585,
-      "fiabilidad": 0.62,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.43,
-      "tiempo_estimado_min": 585
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 877
     },
     {
       "origen": "Huánuco",
       "destino": "Ucayali",
       "distancia_km": 455,
-      "fiabilidad": 0.67,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.4,
-      "tiempo_estimado_min": 455
+      "fiabilidad": 0.95,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 341
     },
     {
       "origen": "Junín",
       "destino": "San Martín",
       "distancia_km": 485,
-      "fiabilidad": 0.7,
+      "fiabilidad": 0.6,
       "tipo_camino": "trocha",
-      "riesgo_historico": 0.35,
-      "tiempo_estimado_min": 485
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 727
     },
     {
       "origen": "Ucayali",
       "destino": "Loreto",
       "distancia_km": 620,
-      "fiabilidad": 0.58,
+      "fiabilidad": 0.6,
       "tipo_camino": "trocha",
-      "riesgo_historico": 0.48,
-      "tiempo_estimado_min": 620
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 930
     },
     {
       "origen": "Cusco",
       "destino": "Madre de Dios",
       "distancia_km": 530,
-      "fiabilidad": 0.63,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.42,
-      "tiempo_estimado_min": 530
+      "fiabilidad": 0.95,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 397
     },
     {
       "origen": "Ucayali",
       "destino": "Madre de Dios",
       "distancia_km": 690,
-      "fiabilidad": 0.55,
+      "fiabilidad": 0.6,
       "tipo_camino": "trocha",
-      "riesgo_historico": 0.5,
-      "tiempo_estimado_min": 690
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1035
     },
     {
       "origen": "Puno",
       "destino": "Madre de Dios",
       "distancia_km": 720,
       "fiabilidad": 0.6,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.45,
-      "tiempo_estimado_min": 720
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1080
     },
     {
-      "comentario": "🔥 NUEVAS CONEXIONES DIRECTAS - Rutas alternativas",
+      "comentario": "CONEXIONES ANTERIORES",
       "origen": "Lambayeque",
       "destino": "Amazonas",
       "distancia_km": 450,
-      "fiabilidad": 0.75,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.28,
-      "tiempo_estimado_min": 450
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 675
     },
     {
       "origen": "Lambayeque",
       "destino": "Cajamarca",
       "distancia_km": 260,
-      "fiabilidad": 0.82,
+      "fiabilidad": 0.95,
       "tipo_camino": "asfaltado",
-      "riesgo_historico": 0.2,
-      "tiempo_estimado_min": 260
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 195
     },
     {
       "origen": "Amazonas",
       "destino": "Loreto",
       "distancia_km": 540,
-      "fiabilidad": 0.63,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.42,
-      "tiempo_estimado_min": 540
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 810
     },
     {
       "origen": "Huánuco",
       "destino": "San Martín",
       "distancia_km": 390,
-      "fiabilidad": 0.72,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.32,
-      "tiempo_estimado_min": 390
+      "fiabilidad": 0.95,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 292
     },
     {
       "origen": "Pasco",
       "destino": "Ucayali",
       "distancia_km": 410,
-      "fiabilidad": 0.68,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.38,
-      "tiempo_estimado_min": 410
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 615
     },
     {
       "origen": "Junín",
       "destino": "Ucayali",
       "distancia_km": 465,
-      "fiabilidad": 0.69,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.36,
-      "tiempo_estimado_min": 465
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 697
     },
     {
       "origen": "Junín",
       "destino": "Ayacucho",
       "distancia_km": 380,
-      "fiabilidad": 0.76,
-      "tipo_camino": "afirmado",
-      "riesgo_historico": 0.28,
-      "tiempo_estimado_min": 380
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 570
+    },
+    {
+      "comentario": "🔥 NUEVAS CONEXIONES ESTRATÉGICAS - Rutas directas adicionales",
+      "origen": "Piura",
+      "destino": "Amazonas",
+      "distancia_km": 580,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 870
+    },
+    {
+      "origen": "Ancash",
+      "destino": "Pasco",
+      "distancia_km": 240,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 360
+    },
+    {
+      "origen": "Lima",
+      "destino": "Pasco",
+      "distancia_km": 295,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 442
+    },
+    {
+      "origen": "Pasco",
+      "destino": "Ayacucho",
+      "distancia_km": 430,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 645
+    },
+    {
+      "origen": "Junín",
+      "destino": "Apurímac",
+      "distancia_km": 425,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 637
+    },
+    {
+      "origen": "San Martín",
+      "destino": "Ucayali",
+      "distancia_km": 485,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 727
+    },
+    {
+      "origen": "Apurímac",
+      "destino": "Madre de Dios",
+      "distancia_km": 650,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 975
+    },
+    {
+      "origen": "Callao",
+      "destino": "Pasco",
+      "distancia_km": 233,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 349
+    },
+    {
+      "origen": "Callao",
+      "destino": "Junín",
+      "distancia_km": 270,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 405
+    },
+    {
+      "origen": "Callao",
+      "destino": "Huancavelica",
+      "distancia_km": 320,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 480
+    },
+    {
+      "origen": "Ica",
+      "destino": "Ayacucho",
+      "distancia_km": 248,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 372
+    },
+    {
+      "origen": "Ica",
+      "destino": "Junín",
+      "distancia_km": 298,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 447
+    },
+    {
+      "origen": "Arequipa",
+      "destino": "Tacna",
+      "distancia_km": 291,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 436
+    },
+    {
+      "origen": "Moquegua",
+      "destino": "Puno",
+      "distancia_km": 232,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 348
+    },
+    {
+      "origen": "Moquegua",
+      "destino": "Cusco",
+      "distancia_km": 548,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 822
+    },
+    {
+      "origen": "Tacna",
+      "destino": "Puno",
+      "distancia_km": 314,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 471
+    },
+    {
+      "origen": "Tacna",
+      "destino": "Cusco",
+      "distancia_km": 689,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1033
+    },
+    {
+      "origen": "Tumbes",
+      "destino": "Lambayeque",
+      "distancia_km": 459,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 688
+    },
+    {
+      "origen": "Tumbes",
+      "destino": "Amazonas",
+      "distancia_km": 489,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 733
+    },
+    {
+      "origen": "Tumbes",
+      "destino": "Cajamarca",
+      "distancia_km": 589,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 883
+    },
+    {
+      "origen": "La Libertad",
+      "destino": "Amazonas",
+      "distancia_km": 377,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 565
+    },
+    {
+      "origen": "Ancash",
+      "destino": "Cajamarca",
+      "distancia_km": 369,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 553
+    },
+    {
+      "origen": "Huánuco",
+      "destino": "Lima",
+      "distancia_km": 326,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 489
+    },
+    {
+      "origen": "Apurímac",
+      "destino": "Huancavelica",
+      "distancia_km": 318,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 477
+    },
+    {
+      "origen": "San Martín",
+      "destino": "La Libertad",
+      "distancia_km": 448,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 672
+    },
+    {
+      "origen": "Loreto",
+      "destino": "Cajamarca",
+      "distancia_km": 903,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1354
+    },
+    {
+      "origen": "Ucayali",
+      "destino": "Ancash",
+      "distancia_km": 455,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 682
+    },
+    {
+      "origen": "Madre de Dios",
+      "destino": "Arequipa",
+      "distancia_km": 641,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 961
+    },
+    {
+      "origen": "Callao",
+      "destino": "Huánuco",
+      "distancia_km": 331,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 496
+    },
+    {
+      "origen": "Callao",
+      "destino": "Ica",
+      "distancia_km": 350,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 525
+    },
+    {
+      "origen": "Ica",
+      "destino": "Apurímac",
+      "distancia_km": 404,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 606
+    },
+    {
+      "origen": "Arequipa",
+      "destino": "Apurímac",
+      "distancia_km": 442,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 663
+    },
+    {
+      "origen": "Arequipa",
+      "destino": "Ayacucho",
+      "distancia_km": 600,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 900
+    },
+    {
+      "origen": "Moquegua",
+      "destino": "Apurímac",
+      "distancia_km": 581,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 871
+    },
+    {
+      "origen": "Moquegua",
+      "destino": "Madre de Dios",
+      "distancia_km": 708,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1062
+    },
+    {
+      "origen": "Tacna",
+      "destino": "Apurímac",
+      "distancia_km": 730,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1095
+    },
+    {
+      "origen": "Tacna",
+      "destino": "Madre de Dios",
+      "distancia_km": 795,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1192
+    },
+    {
+      "origen": "Tumbes",
+      "destino": "La Libertad",
+      "distancia_km": 688,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1032
+    },
+    {
+      "origen": "Tumbes",
+      "destino": "San Martín",
+      "distancia_km": 723,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1084
+    },
+    {
+      "origen": "Piura",
+      "destino": "La Libertad",
+      "distancia_km": 480,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 720
+    },
+    {
+      "origen": "Piura",
+      "destino": "San Martín",
+      "distancia_km": 641,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 961
+    },
+    {
+      "origen": "Lambayeque",
+      "destino": "San Martín",
+      "distancia_km": 509,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 763
+    },
+    {
+      "origen": "La Libertad",
+      "destino": "Huánuco",
+      "distancia_km": 476,
+      "fiabilidad": 0.95,
+      "tipo_camino": "asfaltado",
+      "riesgo_historico": 0.05,
+      "tiempo_estimado_min": 357
+    },
+    {
+      "origen": "Ancash",
+      "destino": "Callao",
+      "distancia_km": 370,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 555
+    },
+    {
+      "origen": "Huánuco",
+      "destino": "Junín",
+      "distancia_km": 342,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 513
+    },
+    {
+      "origen": "Pasco",
+      "destino": "Huancavelica",
+      "distancia_km": 354,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 531
+    },
+    {
+      "origen": "Cusco",
+      "destino": "Huancavelica",
+      "distancia_km": 436,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 654
+    },
+    {
+      "origen": "Puno",
+      "destino": "Apurímac",
+      "distancia_km": 511,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 766
+    },
+    {
+      "origen": "San Martín",
+      "destino": "Ancash",
+      "distancia_km": 470,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 705
+    },
+    {
+      "origen": "Loreto",
+      "destino": "Huánuco",
+      "distancia_km": 990,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1485
+    },
+    {
+      "origen": "Loreto",
+      "destino": "Ancash",
+      "distancia_km": 1036,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1554
+    },
+    {
+      "origen": "Ucayali",
+      "destino": "Cajamarca",
+      "distancia_km": 593,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 889
+    },
+    {
+      "origen": "Ucayali",
+      "destino": "Amazonas",
+      "distancia_km": 606,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 909
+    },
+    {
+      "origen": "Ucayali",
+      "destino": "Lima",
+      "distancia_km": 637,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 955
+    },
+    {
+      "origen": "Madre de Dios",
+      "destino": "Ayacucho",
+      "distancia_km": 714,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1071
+    },
+    {
+      "origen": "Lima",
+      "destino": "Apurímac",
+      "distancia_km": 629,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 943
+    },
+    {
+      "origen": "Lima",
+      "destino": "La Libertad",
+      "distancia_km": 635,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 952
+    },
+    {
+      "origen": "Callao",
+      "destino": "Ayacucho",
+      "distancia_km": 438,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 657
+    },
+    {
+      "origen": "Callao",
+      "destino": "La Libertad",
+      "distancia_km": 631,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 946
+    },
+    {
+      "origen": "Callao",
+      "destino": "Apurímac",
+      "distancia_km": 638,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 957
+    },
+    {
+      "origen": "Ica",
+      "destino": "Pasco",
+      "distancia_km": 495,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 742
+    },
+    {
+      "origen": "Ica",
+      "destino": "Cusco",
+      "distancia_km": 533,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 799
+    },
+    {
+      "origen": "Ica",
+      "destino": "Huánuco",
+      "distancia_km": 602,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 903
+    },
+    {
+      "origen": "Arequipa",
+      "destino": "Huancavelica",
+      "distancia_km": 710,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1065
+    },
+    {
+      "origen": "Arequipa",
+      "destino": "Junín",
+      "distancia_km": 810,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1215
+    },
+    {
+      "origen": "Moquegua",
+      "destino": "Ayacucho",
+      "distancia_km": 741,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1111
+    },
+    {
+      "origen": "Moquegua",
+      "destino": "Ica",
+      "distancia_km": 805,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1207
+    },
+    {
+      "origen": "Moquegua",
+      "destino": "Huancavelica",
+      "distancia_km": 850,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1275
+    },
+    {
+      "origen": "Moquegua",
+      "destino": "Junín",
+      "distancia_km": 951,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1426
+    },
+    {
+      "origen": "Tacna",
+      "destino": "Ayacucho",
+      "distancia_km": 892,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1338
+    },
+    {
+      "origen": "Tacna",
+      "destino": "Ica",
+      "distancia_km": 950,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1425
+    },
+    {
+      "origen": "Tacna",
+      "destino": "Huancavelica",
+      "distancia_km": 1001,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1501
+    },
+    {
+      "origen": "Tacna",
+      "destino": "Junín",
+      "distancia_km": 1102,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1653
+    },
+    {
+      "origen": "Tumbes",
+      "destino": "Ancash",
+      "distancia_km": 958,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1437
+    },
+    {
+      "origen": "Tumbes",
+      "destino": "Ucayali",
+      "distancia_km": 1096,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1644
+    },
+    {
+      "origen": "Tumbes",
+      "destino": "Huánuco",
+      "distancia_km": 1100,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1650
+    },
+    {
+      "origen": "Piura",
+      "destino": "Ancash",
+      "distancia_km": 768,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1152
+    },
+    {
+      "origen": "Piura",
+      "destino": "Huánuco",
+      "distancia_km": 929,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1393
+    },
+    {
+      "origen": "Piura",
+      "destino": "Ucayali",
+      "distancia_km": 986,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1479
+    },
+    {
+      "origen": "Piura",
+      "destino": "Pasco",
+      "distancia_km": 1010,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1515
+    },
+    {
+      "origen": "Lambayeque",
+      "destino": "Ancash",
+      "distancia_km": 531,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 796
+    },
+    {
+      "origen": "Lambayeque",
+      "destino": "Huánuco",
+      "distancia_km": 701,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1051
+    },
+    {
+      "origen": "Lambayeque",
+      "destino": "Pasco",
+      "distancia_km": 776,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1164
+    },
+    {
+      "origen": "Lambayeque",
+      "destino": "Ucayali",
+      "distancia_km": 804,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1206
+    },
+    {
+      "origen": "La Libertad",
+      "destino": "Pasco",
+      "distancia_km": 542,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 813
+    },
+    {
+      "origen": "Ancash",
+      "destino": "Junín",
+      "distancia_km": 493,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 739
+    },
+    {
+      "origen": "Cajamarca",
+      "destino": "Pasco",
+      "distancia_km": 602,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 903
+    },
+    {
+      "origen": "Huánuco",
+      "destino": "Huancavelica",
+      "distancia_km": 450,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 675
+    },
+    {
+      "origen": "Huancavelica",
+      "destino": "Ancash",
+      "distancia_km": 594,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 891
+    },
+    {
+      "origen": "Ayacucho",
+      "destino": "Huánuco",
+      "distancia_km": 547,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 820
+    },
+    {
+      "origen": "Puno",
+      "destino": "Huancavelica",
+      "distancia_km": 822,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1233
+    },
+    {
+      "origen": "Puno",
+      "destino": "Ica",
+      "distancia_km": 837,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1255
+    },
+    {
+      "origen": "Puno",
+      "destino": "Junín",
+      "distancia_km": 908,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1362
+    },
+    {
+      "origen": "Amazonas",
+      "destino": "Ancash",
+      "distancia_km": 545,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 817
+    },
+    {
+      "origen": "Amazonas",
+      "destino": "Huánuco",
+      "distancia_km": 645,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 967
+    },
+    {
+      "origen": "San Martín",
+      "destino": "Pasco",
+      "distancia_km": 607,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 910
+    },
+    {
+      "origen": "Loreto",
+      "destino": "La Libertad",
+      "distancia_km": 1042,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1563
+    },
+    {
+      "origen": "Loreto",
+      "destino": "Lambayeque",
+      "distancia_km": 1048,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1572
+    },
+    {
+      "origen": "Loreto",
+      "destino": "Piura",
+      "distancia_km": 1083,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1624
+    },
+    {
+      "origen": "Ucayali",
+      "destino": "Huancavelica",
+      "distancia_km": 640,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 960
+    },
+    {
+      "origen": "Ucayali",
+      "destino": "La Libertad",
+      "distancia_km": 641,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 961
+    },
+    {
+      "origen": "Ucayali",
+      "destino": "Callao",
+      "distancia_km": 644,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 966
+    },
+    {
+      "origen": "Ucayali",
+      "destino": "Ayacucho",
+      "distancia_km": 693,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1039
+    },
+    {
+      "origen": "Madre de Dios",
+      "destino": "Huancavelica",
+      "distancia_km": 816,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1224
+    },
+    {
+      "origen": "Madre de Dios",
+      "destino": "Junín",
+      "distancia_km": 852,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1278
+    },
+    {
+      "origen": "Madre de Dios",
+      "destino": "Ica",
+      "distancia_km": 944,
+      "fiabilidad": 0.6,
+      "tipo_camino": "trocha",
+      "riesgo_historico": 0.3,
+      "tiempo_estimado_min": 1416
     }
   ]
 }

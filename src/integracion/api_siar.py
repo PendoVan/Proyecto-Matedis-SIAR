@@ -875,12 +875,63 @@ async def demo_codificacion(mensaje: MensajeResiliente):
             "descripcion": mensaje.descripcion
         },
         bits_codificados=len(paquete['mensaje_codificado']),
-        redundancia=75.0,  # Hamming(7,4) tiene ~75% redundancia
-        errores_simulados=mensaje.simular_errores,
         errores_corregidos=errores_corregidos,
         mensaje_recuperado=mensaje_decodificado or {},
         firma_valida=mensaje_decodificado is not None
     )
+
+
+# ==========  DASHBOARD INTEGRATION ==========
+from src.integracion.dashboard_endpoints import router as dashboard_router
+app.include_router(dashboard_router, prefix="/dashboard", tags=["Dashboard"])
+
+
+@app.post("/demo/hamming-paso-a-paso", tags=["Demo"])
+async def demo_hamming_paso_a_paso(datos: List[int]):
+    """
+    Demo educativo que muestra paso a paso la corrección de Hamming.
+    
+    Args:
+        datos: Lista de 7 bits con posible error
+    
+    Returns:
+        Proceso detallado de decodificación
+    """
+    from src.unidad4_codificacion.hamming import CodificadorHamming
+    
+    hamming = CodificadorHamming()
+    
+    try:
+        resultado = hamming.decodificar_bloque_detallado(datos)
+        return resultado
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/alertas/estadisticas-tiempo-real", tags=["Alertas"])
+async def obtener_estadisticas_alertas_tiempo_real():
+    """
+    Retorna contadores de alertas en tiempo real.
+    """
+    alertas_activas = [a for a in alertas_db.values() 
+                       if a.estado not in [EstadoAlerta.RESUELTA, EstadoAlerta.FALSA_ALARMA]]
+    
+    # Clasificar por severidad basado en nivel de confianza
+    criticas = [a for a in alertas_activas if a.nivel_confianza > 0.8]
+    moderadas = [a for a in alertas_activas if 0.5 < a.nivel_confianza <= 0.8]
+    informativas = [a for a in alertas_activas if a.nivel_confianza <= 0.5]
+    
+    return {
+        "total_activas": len(alertas_activas),
+        "criticas": len(criticas),
+        "moderadas": len(moderadas),
+        "informativas": len(informativas),
+        "por_tipo": {
+            tipo: sum(1 for a in alertas_activas if a.tipo == tipo)
+            for tipo in set(a.tipo for a in alertas_activas)
+        },
+        "ultima_actualizacion": datetime.now().isoformat()
+    }
 
 
 if __name__ == "__main__":

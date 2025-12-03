@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIAR - Dashboard del Sistema</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            color: #1e3c72;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: #666;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .chart-card h2 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .contador-row {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .contador {
+            text-align: center;
+        }
+
+        .contador-valor {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .contador-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .critica {
+            color: #dc3545;
+        }
+
+        .moderada {
+            color: #FFC107;
+        }
+
+        .informativa {
+            color: #28a745;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Dashboard de Salud del Sistema SIAR</h1>
+            <p>Monitoreo en Tiempo Real - Actualización automática cada 5 segundos</p>
+        </header>
+
+        <!-- Estadísticas Generales -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Departamentos</div>
+                <div class="stat-value" id="stat-departamentos">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Rutas Totales</div>
+                <div class="stat-value" id="stat-rutas">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Distancia Total</div>
+                <div class="stat-value" id="stat-distancia">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Fiabilidad Promedio</div>
+                <div class="stat-value" id="stat-fiabilidad">--</div>
+            </div>
+            <div class="stat-card" style="background: #fff3cd;">
+                <div class="stat-label">Alertas Activas</div>
+                <div class="stat-value" style="color: #856404;" id="stat-alertas-activas">--</div>
+            </div>
+            <div class="stat-card" style="background: #f8d7da;">
+                <div class="stat-label">Críticas</div>
+                <div class="stat-value" style="color: #721c24;" id="stat-alertas-criticas">--</div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="grid-2">
+            <!-- Fiabilidad por Departamento -->
+            <div class="chart-card">
+                <h2>Fiabilidad por Departamento</h2>
+                <div class="chart-container">
+                    <canvas id="grafico-fiabilidad"></canvas>
+                </div>
+            </div>
+
+            <!-- Alertas por Tipo -->
+            <div class="chart-card">
+                <h2>Distribución de Alertas</h2>
+                <div class="chart-container">
+                    <canvas id="grafico-alertas"></canvas>
+                </div>
+                <div class="contador-row">
+                    <div class="contador">
+                        <div class="contador-valor critica" id="contador-criticas">0</div>
+                        <div class="contador-label">Críticas</div>
+                    </div>
+                    <div class="contador">
+                        <div class="contador-valor moderada" id="contador-moderadas">0</div>
+                        <div class="contador-label">Moderadas</div>
+                    </div>
+                    <div class="contador">
+                        <div class="contador-valor informativa" id="contador-informativas">0</div>
+                        <div class="contador-label">Informativas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa de Calor -->
+        <div class="chart-card">
+            <h2>Mapa de Calor - Rutas por Riesgo</h2>
+            <div id="resumen-mapa-calor"></div>
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+    <script>
+        // Inicializar dashboard cuando cargue la página
+        window.onload = () => {
+            inicializarDashboard();
+        };
+    </script>
+</body>
+
+</html>

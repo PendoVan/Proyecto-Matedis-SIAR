@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIAR - Sistema Nacional de Rutas Inteligentes</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -105,6 +106,101 @@
 
         .tab-content.active {
             display: block;
+        }
+
+        /* Estilos del Dashboard */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .dashboard-stat {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
+
+        .dashboard-stat-label {
+            font-size: 0.7em;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .dashboard-stat-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .dashboard-chart {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 12px;
+        }
+
+        .dashboard-chart h4 {
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .chart-small {
+            height: 180px;
+            position: relative;
+        }
+
+        .alert-contador {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .alert-contador-item {
+            text-align: center;
+        }
+
+        .alert-contador-valor {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .alert-contador-label {
+            font-size: 0.7em;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .critica {
+            color: #dc3545;
+        }
+
+        .moderada {
+            color: #ffc107;
+        }
+
+        .informativa {
+            color: #28a745;
+        }
+
+        .dashboard-update {
+            font-size: 0.7em;
+            color: #999;
+            text-align: center;
+            padding: 5px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 10px;
         }
 
         .card {
@@ -320,6 +416,7 @@
                     <button class="tab-btn" onclick="switchTab('clima')">Clima & IA</button>
                     <button class="tab-btn" onclick="switchTab('alertas')">Alertas</button>
                     <button class="tab-btn" onclick="switchTab('demo')">Demo</button>
+                    <button class="tab-btn" onclick="switchTab('dashboard')">Monitor</button>
                 </div>
 
                 <div id="rutas" class="tab-content active">
@@ -450,6 +547,110 @@
                         <button onclick="demoCodificacion()" style="background: #28a745;">Ejecutar Demo</button>
                     </div>
                     <div id="resultado-demo"></div>
+                </div>
+
+                <!-- NUEVA PESTAÑA: DASHBOARD -->
+                <div id="dashboard" class="tab-content">
+                    <div class="dashboard-update" id="dashboard-update">
+                        Actualización: Cargando...
+                    </div>
+
+                    <!-- Estadísticas Generales -->
+                    <div class="dashboard-stats">
+                        <div class="dashboard-stat">
+                            <div class="dashboard-stat-label">Departamentos</div>
+                            <div class="dashboard-stat-value" id="dash-departamentos">--</div>
+                        </div>
+                        <div class="dashboard-stat">
+                            <div class="dashboard-stat-label">Rutas</div>
+                            <div class="dashboard-stat-value" id="dash-rutas">--</div>
+                        </div>
+                        <div class="dashboard-stat">
+                            <div class="dashboard-stat-label">Distancia</div>
+                            <div class="dashboard-stat-value" id="dash-distancia">--</div>
+                        </div>
+                        <div class="dashboard-stat">
+                            <div class="dashboard-stat-label">Fiabilidad</div>
+                            <div class="dashboard-stat-value" id="dash-fiabilidad">--</div>
+                        </div>
+                        <div class="dashboard-stat" style="background: #fff3cd;">
+                            <div class="dashboard-stat-label">Alertas</div>
+                            <div class="dashboard-stat-value" style="color: #856404;" id="dash-alertas">--</div>
+                        </div>
+                        <div class="dashboard-stat" style="background: #f8d7da;">
+                            <div class="dashboard-stat-label">Críticas</div>
+                            <div class="dashboard-stat-value" style="color: #721c24;" id="dash-criticas">--</div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de Fiabilidad -->
+                    <div class="dashboard-chart">
+                        <h4>Fiabilidad por Departamento</h4>
+                        <div class="chart-small">
+                            <canvas id="grafico-fiabilidad-dash"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de Alertas -->
+                    <div class="dashboard-chart">
+                        <h4>Distribución de Alertas</h4>
+                        <div class="chart-small">
+                            <canvas id="grafico-alertas-dash"></canvas>
+                        </div>
+                        <div class="alert-contador">
+                            <div class="alert-contador-item">
+                                <div class="alert-contador-valor critica" id="dash-contador-criticas">0</div>
+                                <div class="alert-contador-label">Críticas</div>
+                            </div>
+                            <div class="alert-contador-item">
+                                <div class="alert-contador-valor moderada" id="dash-contador-moderadas">0</div>
+                                <div class="alert-contador-label">Moderadas</div>
+                            </div>
+                            <div class="alert-contador-item">
+                                <div class="alert-contador-valor informativa" id="dash-contador-info">0</div>
+                                <div class="alert-contador-label">Informativas</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen Hamming -->
+                    <div class="dashboard-chart">
+                        <h4>Sistema de Corrección Hamming</h4>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-label">Mensajes</div>
+                                <div class="stat-value" style="font-size: 1em;" id="dash-hamming-mensajes">--</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Errores</div>
+                                <div class="stat-value" style="font-size: 1em; color: #dc3545;" id="dash-hamming-errores">--</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Corregidos</div>
+                                <div class="stat-value" style="font-size: 1em; color: #28a745;" id="dash-hamming-corregidos">--</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Eficiencia</div>
+                                <div class="stat-value" style="font-size: 1em;" id="dash-hamming-eficiencia">--</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tendencias Históricas -->
+                    <div class="dashboard-chart">
+                        <h4>📈 Tendencias Históricas (7 días)</h4>
+                        <div class="chart-small" style="height: 200px;">
+                            <canvas id="grafico-tendencias-dash"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Actividad por Día -->
+                    <div class="dashboard-chart">
+                        <h4>📅 Actividad Diaria</h4>
+                        <div class="chart-small" style="height: 160px;">
+                            <canvas id="grafico-actividad-dash"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -773,6 +974,13 @@
                     puntoSeleccionado = null;
                     document.getElementById('btn-enviar-alerta').disabled = true;
                 }
+
+                // Manejar dashboard
+                if (tab === 'dashboard') {
+                    iniciarActualizacionDashboard();
+                } else {
+                    detenerActualizacionDashboard();
+                }
             }
 
             function onMapClick(e) {
@@ -849,6 +1057,10 @@
                 const ubicacion = document.getElementById('demo-ubicacion').value;
                 const errores = parseInt(document.getElementById('demo-errores').value) || 0;
 
+                const btn = event.target;
+                btn.disabled = true;
+                btn.textContent = 'Ejecutando...';
+
                 try {
                     const res = await fetch(`${API_BASE}/demo/codificacion`, {
                         method: 'POST',
@@ -861,39 +1073,357 @@
                         })
                     });
 
+                    if (!res.ok) {
+                        throw new Error(`Error HTTP ${res.status}`);
+                    }
+
                     const demo = await res.json();
 
                     document.getElementById('resultado-demo').innerHTML = `
                     <div class="card" style="background:#e7f3ff;">
-                        <h3>Resultado de Demo</h3>
+                        <h3>✓ Resultado de Demo Hamming</h3>
                         <div style="font-family: monospace; font-size: 0.85em;">
                             <p><strong>Mensaje Original:</strong><br>
                                 ${JSON.stringify(demo.mensaje_original, null, 2)}</p>
                             
                             <p><strong>Codificación:</strong><br>
                                 Bits totales: ${demo.bits_codificados}<br>
-                                Redundancia: ${demo.redundancia.toFixed(1)}%</p>
+                                Redundancia: ${demo.redundancia ? demo.redundancia.toFixed(1) : '75.0'}%</p>
                             
                             <p style="color: ${demo.errores_simulados > 0 ? '#dc3545' : '#28a745'};">
                                 <strong>Transmisión:</strong><br>
-                                Errores introducidos: ${demo.errores_simulados}<br>
-                                Errores corregidos: ${demo.errores_corregidos}</p>
+                                Errores introducidos: ${demo.errores_simulados || 0}<br>
+                                Errores corregidos: ${demo.errores_corregidos || 0}</p>
                             
                             <p><strong>Mensaje Recuperado:</strong><br>
                                 ${JSON.stringify(demo.mensaje_recuperado, null, 2)}</p>
                             
                             <p style="color: ${demo.firma_valida ? '#28a745' : '#dc3545'};">
                                 <strong>Firma Digital:</strong> ${demo.firma_valida ? 'VÁLIDA ✓' : 'INVÁLIDA ✗'}</p>
+                            
+                            ${demo.errores_simulados > 0 ? `
+                                <div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin-top: 10px;">
+                                    <strong>📊 Análisis:</strong><br>
+                                    ✅ Código de Hamming corrigió ${demo.errores_corregidos} error(es)<br>
+                                    ✅ Tasa de éxito: ${demo.errores_corregidos === demo.errores_simulados ? '100%' : 'Parcial'}
+                                </div>
+                            ` : ''}
                         </div>
                     </div>`;
 
                 } catch (e) {
-                    console.error(e);
-                    alert('Error ejecutando demo');
+                    console.error('Error en demo:', e);
+                    document.getElementById('resultado-demo').innerHTML = `
+                    <div class="card" style="background:#f8d7da; border-left: 4px solid #dc3545;">
+                        <h3>✗ Error en Demo</h3>
+                        <p>${e.message}</p>
+                        <p style="font-size: 0.8em; color: #666;">
+                            Verifica que el servidor esté corriendo en puerto 8000.
+                        </p>
+                    </div>`;
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Ejecutar Demo';
                 }
             }
 
-            // Inicialización
+            // ===== DASHBOARD =====
+            let graficoFiabilidadDash = null;
+            let graficoAlertasDash = null;
+            let graficoTendenciasDash = null;
+            let graficoActividadDash = null;
+            let dashboardInterval = null;
+
+            async function cargarDashboard() {
+                try {
+                    await cargarEstadisticasGeneralesDash();
+                    await cargarResumenAlertasDash();
+                    await cargarFiabilidadDepartamentosDash();
+                    await cargarHammingStatsDash();
+                    await cargarTendenciasHistoricasDash();
+                    actualizarTiempoDash();
+                } catch (error) {
+                    console.error('Error cargando dashboard:', error);
+                }
+            }
+
+            async function cargarEstadisticasGeneralesDash() {
+                const res = await fetch(`${API_BASE}/dashboard/estadisticas`);
+                const stats = await res.json();
+
+                document.getElementById('dash-departamentos').textContent = stats.total_departamentos;
+                document.getElementById('dash-rutas').textContent = stats.total_rutas;
+                document.getElementById('dash-distancia').textContent = `${stats.distancia_total_km.toFixed(0)} km`;
+                document.getElementById('dash-fiabilidad').textContent = `${(stats.fiabilidad_promedio * 100).toFixed(1)}%`;
+                document.getElementById('dash-alertas').textContent = stats.alertas_activas;
+                document.getElementById('dash-criticas').textContent = stats.alertas_criticas;
+            }
+
+            async function cargarResumenAlertasDash() {
+                const res = await fetch(`${API_BASE}/dashboard/alertas-resumen`);
+                const alertas = await res.json();
+
+                const criticas = alertas.filter(a => a.severidad === 'critica').reduce((sum, a) => sum + a.cantidad, 0);
+                const moderadas = alertas.filter(a => a.severidad === 'moderada').reduce((sum, a) => sum + a.cantidad, 0);
+                const informativas = alertas.filter(a => a.severidad === 'informativa').reduce((sum, a) => sum + a.cantidad, 0);
+
+                document.getElementById('dash-contador-criticas').textContent = criticas;
+                document.getElementById('dash-contador-moderadas').textContent = moderadas;
+                document.getElementById('dash-contador-info').textContent = informativas;
+
+                // Crear gráfico
+                const ctx = document.getElementById('grafico-alertas-dash');
+                if (ctx) {
+                    if (graficoAlertasDash) {
+                        graficoAlertasDash.destroy();
+                    }
+
+                    graficoAlertasDash = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: alertas.map(a => a.tipo),
+                            datasets: [{
+                                data: alertas.map(a => a.cantidad),
+                                backgroundColor: alertas.map(a => {
+                                    if (a.severidad === 'critica') return '#dc3545';
+                                    if (a.severidad === 'moderada') return '#ffc107';
+                                    return '#28a745';
+                                })
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        font: { size: 10 },
+                                        boxWidth: 12
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            async function cargarFiabilidadDepartamentosDash() {
+                const res = await fetch(`${API_BASE}/dashboard/fiabilidad-departamentos`);
+                const departamentos = await res.json();
+
+                // Tomar solo los primeros 8 para que quepa en el gráfico
+                const top8 = departamentos.slice(0, 8);
+
+                const ctx = document.getElementById('grafico-fiabilidad-dash');
+                if (ctx) {
+                    if (graficoFiabilidadDash) {
+                        graficoFiabilidadDash.destroy();
+                    }
+
+                    graficoFiabilidadDash = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: top8.map(d => d.departamento),
+                            datasets: [{
+                                label: 'Fiabilidad (%)',
+                                data: top8.map(d => (d.fiabilidad_promedio * 100).toFixed(1)),
+                                backgroundColor: top8.map(d => {
+                                    if (d.estado === 'optimo') return '#28a745';
+                                    if (d.estado === 'normal') return '#ffc107';
+                                    return '#dc3545';
+                                })
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    ticks: { font: { size: 10 } }
+                                },
+                                x: {
+                                    ticks: { font: { size: 9 } }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                }
+            }
+
+            async function cargarHammingStatsDash() {
+                try {
+                    const res = await fetch(`${API_BASE}/dashboard/hamming-stats`);
+                    const stats = await res.json();
+
+                    document.getElementById('dash-hamming-mensajes').textContent = stats.total_mensajes;
+                    document.getElementById('dash-hamming-errores').textContent = stats.total_errores_detectados;
+                    document.getElementById('dash-hamming-corregidos').textContent = stats.total_errores_corregidos;
+                    document.getElementById('dash-hamming-eficiencia').textContent = `${stats.eficiencia_correccion.toFixed(1)}%`;
+                } catch (error) {
+                    console.error('Error cargando Hamming stats:', error);
+                }
+            }
+
+            async function cargarTendenciasHistoricasDash() {
+                try {
+                    const res = await fetch(`${API_BASE}/dashboard/tendencias-historicas?dias=7`);
+                    const tendencias = await res.json();
+
+                    // Gráfico de Tendencias (Líneas múltiples)
+                    const ctxTendencias = document.getElementById('grafico-tendencias-dash');
+                    if (ctxTendencias) {
+                        if (graficoTendenciasDash) {
+                            graficoTendenciasDash.destroy();
+                        }
+
+                        graficoTendenciasDash = new Chart(ctxTendencias, {
+                            type: 'line',
+                            data: {
+                                labels: tendencias.fechas,
+                                datasets: [
+                                    {
+                                        label: 'Fiabilidad %',
+                                        data: tendencias.fiabilidad_promedio.map(f => (f * 100).toFixed(1)),
+                                        borderColor: '#28a745',
+                                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                        tension: 0.4,
+                                        yAxisID: 'y'
+                                    },
+                                    {
+                                        label: 'Alertas',
+                                        data: tendencias.alertas_por_dia,
+                                        borderColor: '#dc3545',
+                                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                                        tension: 0.4,
+                                        yAxisID: 'y1'
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                interaction: {
+                                    mode: 'index',
+                                    intersect: false
+                                },
+                                scales: {
+                                    y: {
+                                        type: 'linear',
+                                        position: 'left',
+                                        title: {
+                                            display: true,
+                                            text: 'Fiabilidad %',
+                                            font: { size: 10 }
+                                        },
+                                        ticks: { font: { size: 9 } },
+                                        min: 0,
+                                        max: 100
+                                    },
+                                    y1: {
+                                        type: 'linear',
+                                        position: 'right',
+                                        title: {
+                                            display: true,
+                                            text: 'Alertas',
+                                            font: { size: 10 }
+                                        },
+                                        ticks: { font: { size: 9 } },
+                                        grid: {
+                                            drawOnChartArea: false
+                                        }
+                                    },
+                                    x: {
+                                        ticks: { font: { size: 9 } }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                        labels: { font: { size: 10 } }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // Gráfico de Actividad (Barras)
+                    const ctxActividad = document.getElementById('grafico-actividad-dash');
+                    if (ctxActividad) {
+                        if (graficoActividadDash) {
+                            graficoActividadDash.destroy();
+                        }
+
+                        graficoActividadDash = new Chart(ctxActividad, {
+                            type: 'bar',
+                            data: {
+                                labels: tendencias.fechas,
+                                datasets: [
+                                    {
+                                        label: 'Correcciones Hamming',
+                                        data: tendencias.correcciones_exitosas,
+                                        backgroundColor: '#28a745'
+                                    },
+                                    {
+                                        label: 'Errores Detectados',
+                                        data: tendencias.errores_hamming,
+                                        backgroundColor: '#ffc107'
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: { font: { size: 9 } }
+                                    },
+                                    x: {
+                                        ticks: { font: { size: 9 } }
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                        labels: { font: { size: 10 } }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                } catch (error) {
+                    console.error('Error cargando tendencias históricas:', error);
+                }
+            }
+
+            function actualizarTiempoDash() {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                document.getElementById('dashboard-update').textContent = `Última actualización: ${timeStr}`;
+            }
+
+            function iniciarActualizacionDashboard() {
+                if (dashboardInterval) {
+                    clearInterval(dashboardInterval);
+                }
+                cargarDashboard();
+                dashboardInterval = setInterval(cargarDashboard, 10000); // Cada 10 segundos
+            }
+
+            function detenerActualizacionDashboard() {
+                if (dashboardInterval) {
+                    clearInterval(dashboardInterval);
+                    dashboardInterval = null;
+                }
+            }
+
             window.onload = () => {
                 initMap();
                 cargarDatos();
