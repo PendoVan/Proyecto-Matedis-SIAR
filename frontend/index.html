@@ -414,8 +414,7 @@
                     <button class="tab-btn active" onclick="switchTab('rutas')">Rutas</button>
                     <button class="tab-btn" onclick="switchTab('comparar')">Comparar</button>
                     <button class="tab-btn" onclick="switchTab('clima')">Clima & IA</button>
-                    <button class="tab-btn" onclick="switchTab('alertas')">Alertas</button>
-                    <button class="tab-btn" onclick="switchTab('demo')">Demo</button>
+                    <button class="tab-btn" onclick="window.open('alertas_fsm.html', '_blank')">Alertas FSM</button>
                     <button class="tab-btn" onclick="switchTab('dashboard')">Monitor</button>
                 </div>
 
@@ -485,19 +484,6 @@
                         <button onclick="predecirClima()">Predecir</button>
                     </div>
                     <div id="resultado-clima"></div>
-
-                    <div class="card" style="border-left: 4px solid #6610f2;">
-                        <h3>Monitor Automático (IA)</h3>
-                        <p style="font-size: 0.8em; color: #666; margin-bottom: 10px;">
-                            Ejecuta el script de predicción automática en el servidor para todas las rutas críticas.
-                        </p>
-                        <button onclick="ejecutarMonitor()" style="background: #6610f2;">
-                            Iniciar Escaneo de Red
-                        </button>
-                        <div id="monitor-console" class="monitor-console">
-                            <div class="log-info">> Sistema listo. Esperando comando...</div>
-                        </div>
-                    </div>
                 </div>
 
                 <div id="alertas" class="tab-content">
@@ -623,11 +609,13 @@
                             </div>
                             <div class="stat-box">
                                 <div class="stat-label">Errores</div>
-                                <div class="stat-value" style="font-size: 1em; color: #dc3545;" id="dash-hamming-errores">--</div>
+                                <div class="stat-value" style="font-size: 1em; color: #dc3545;"
+                                    id="dash-hamming-errores">--</div>
                             </div>
                             <div class="stat-box">
                                 <div class="stat-label">Corregidos</div>
-                                <div class="stat-value" style="font-size: 1em; color: #28a745;" id="dash-hamming-corregidos">--</div>
+                                <div class="stat-value" style="font-size: 1em; color: #28a745;"
+                                    id="dash-hamming-corregidos">--</div>
                             </div>
                             <div class="stat-box">
                                 <div class="stat-label">Eficiencia</div>

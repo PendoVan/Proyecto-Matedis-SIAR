@@ -101,6 +101,8 @@ class MaquinaEstadosAlerta:
             EstadoAlerta.FALSA_ALARMA: {},
             EstadoAlerta.EXPIRADA: {}
         }
+
+        self.alertas: Dict[str, Alerta] = {}
         
         # Callbacks opcionales para ejecutar al entrar en un estado
         self.callbacks: Dict[EstadoAlerta, List[Callable]] = {}
@@ -166,6 +168,31 @@ class MaquinaEstadosAlerta:
         if estado not in self.callbacks:
             self.callbacks[estado] = []
         self.callbacks[estado].append(callback)
+
+    def listar_alertas(
+        self,
+        estado: Optional[str] = None,
+        departamento: Optional[str] = None
+    ) -> List[Alerta]:
+        """
+        Lista alertas con filtros opcionales.
+        
+        Args:
+            estado: Filtrar por estado (NORMAL, ALERTA, CRÍTICO, RESUELTO)
+            departamento: Filtrar por departamento
+        
+        Returns:
+            Lista de alertas filtradas
+        """
+        alertas = list(self.alertas.values())
+        
+        if estado:
+            alertas = [a for a in alertas if a.estado_actual.value == estado]
+        
+        if departamento:
+            alertas = [a for a in alertas if a.departamento == departamento]
+        
+        return alertas
     
     def obtener_estados_posibles(self, estado_actual: EstadoAlerta) -> List[EstadoAlerta]:
         """Retorna los estados alcanzables desde el estado actual."""

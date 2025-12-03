@@ -21,10 +21,9 @@ from src.unidad3_grafos.grafo_rutas import GrafoRutas, TipoCamino
 from src.unidad3_grafos.algoritmo_fiabilidad import Ruta
 from src.unidad3_grafos.algoritmo_fiabilidad_geo import AlgoritmoFiabilidadGeo  # 🔥 Algoritmo con penalización geográfica
 from src.unidad3_grafos.prediccion_climatica import IntegradorSENAMHI
-from src.unidad3_grafos.maquina_estados import (
-    MaquinaEstadosAlerta, MaquinaEstadosLogistica,
-    Alerta, LoteCosecha, EstadoAlerta, EstadoLote,
-    EventoAlerta, EventoLote
+from src.integracion.maquina_estados import (
+    MaquinaEstadosAlerta, Alerta,
+    EstadoAlerta
 )
 
 # Intentar importar red neuronal
@@ -116,6 +115,20 @@ class AlertaGeoResponse(BaseModel):
     firma_valida: bool
     timestamp: str
 
+class AlertaFSMCreate(BaseModel):
+    """Modelo para crear alerta FSM"""
+    departamento: str
+    coordenadas: Dict[str, float]
+    tipo: str
+    descripcion: str
+    fiabilidad: float
+    metadata: Dict[str, float]
+
+class TransicionRequest(BaseModel):
+    """Modelo para solicitar transición de estado"""
+    evento: str
+    razon: str
+
 
 # ========== INICIALIZACIÓN ==========
 
@@ -141,12 +154,10 @@ clasificador: Optional[ClasificadorRutas] = None
 predictor_clima: Optional[IntegradorSENAMHI] = None
 
 alertas_db: Dict[str, Alerta] = {}
-lotes_db: Dict[str, LoteCosecha] = {}
 contador_alertas = 0
 contador_lotes = 0
 
 fsm_alertas = MaquinaEstadosAlerta()
-fsm_logistica = MaquinaEstadosLogistica()
 
 # Coordenadas de departamentos
 COORDENADAS = {
@@ -931,6 +942,258 @@ async def obtener_estadisticas_alertas_tiempo_real():
             for tipo in set(a.tipo for a in alertas_activas)
         },
         "ultima_actualizacion": datetime.now().isoformat()
+    }
+
+@app.post("/fsm/alertas/crear", tags=["FSM Alertas"])
+async def crear_alerta_fsm(alerta_data: AlertaFSMCreate):
+    """
+    Crea una nueva alerta usando FSM.
+    El estado inicial se determina automáticamente según las condiciones.
+    """
+    try:
+        alerta = fsm_alertas.crear_alerta(
+            departamento=alerta_data.departamento,
+            coordenadas=alerta_data.coordenadas,
+            tipo=alerta_data.tipo,
+            descripcion=alerta_data.descripcion,
+            fiabilidad=alerta_data.fiabilidad,
+            metadata=alerta_data.metadata
+        )
+        
+        return {
+            "success": True,
+            "alerta": {
+                "id": alerta.id,
+                "departamento": alerta.departamento,
+                "coordenadas": {
+                    "lat": alerta.coordenadas.lat,
+                    "lon": alerta.coordenadas.lon
+                },
+                "tipo": alerta.tipo.value,
+                "descripcion": alerta.descripcion,
+                "estado_actual": alerta.estado_actual.value,
+                "fiabilidad": alerta.fiabilidad,
+                "severidad": alerta.severidad,
+                "creado_en": alerta.creado_en,
+                "actualizado_en": alerta.actualizado_en,
+                "metadata": {
+                    "precipitacion": alerta.metadata.precipitacion,
+                    "temperatura": alerta.metadata.temperatura,
+                    "viento": alerta.metadata.viento
+                },
+                "historial": [
+                    {
+                        "timestamp": h.timestamp,
+                        "estado_anterior": h.estado_anterior,
+                        "estado_nuevo": h.estado_nuevo,
+                        "evento": h.evento,
+                        "razon": h.razon
+                    }
+                    for h in alerta.historial
+                ]
+            },
+            "mensaje": f"Alerta creada en estado {alerta.estado_actual.value}"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/fsm/alertas/listar", tags=["FSM Alertas"])
+async def listar_alertas_fsm(
+    estado: Optional[str] = None,
+    departamento: Optional[str] = None
+):
+    """Lista todas las alertas con filtros opcionales."""
+    alertas = fsm_alertas.listar_alertas(estado=estado, departamento=departamento)
+    
+    return {
+        "total": len(alertas),
+        "filtros": {"estado": estado, "departamento": departamento},
+        "alertas": [
+            {
+                "id": a.id,
+                "departamento": a.departamento,
+                "coordenadas": {"lat": a.coordenadas.lat, "lon": a.coordenadas.lon},
+                "tipo": a.tipo.value,
+                "descripcion": a.descripcion,
+                "estado_actual": a.estado_actual.value,
+                "fiabilidad": a.fiabilidad,
+                "severidad": a.severidad,
+                "creado_en": a.creado_en,
+                "actualizado_en": a.actualizado_en,
+                "metadata": {
+                    "precipitacion": a.metadata.precipitacion,
+                    "temperatura": a.metadata.temperatura,
+                    "viento": a.metadata.viento
+                }
+            }
+            for a in alertas
+        ]
+    }
+
+
+@app.get("/fsm/alertas/{alerta_id}", tags=["FSM Alertas"])
+async def obtener_alerta_fsm(alerta_id: str):
+    """Obtiene los detalles de una alerta específica."""
+    alerta = fsm_alertas.obtener_alerta(alerta_id)
+    
+    if not alerta:
+        raise HTTPException(status_code=404, detail=f"Alerta {alerta_id} no encontrada")
+    
+    return {
+        "id": alerta.id,
+        "departamento": alerta.departamento,
+        "coordenadas": {"lat": alerta.coordenadas.lat, "lon": alerta.coordenadas.lon},
+        "tipo": alerta.tipo.value,
+        "descripcion": alerta.descripcion,
+        "estado_actual": alerta.estado_actual.value,
+        "fiabilidad": alerta.fiabilidad,
+        "severidad": alerta.severidad,
+        "creado_en": alerta.creado_en,
+        "actualizado_en": alerta.actualizado_en,
+        "metadata": {
+            "precipitacion": alerta.metadata.precipitacion,
+            "temperatura": alerta.metadata.temperatura,
+            "viento": alerta.metadata.viento
+        },
+        "historial": [
+            {
+                "timestamp": h.timestamp,
+                "estado_anterior": h.estado_anterior,
+                "estado_nuevo": h.estado_nuevo,
+                "evento": h.evento,
+                "razon": h.razon
+            }
+            for h in alerta.historial
+        ]
+    }
+
+
+@app.post("/fsm/alertas/{alerta_id}/transicion", tags=["FSM Alertas"])
+async def ejecutar_transicion_fsm(alerta_id: str, transicion: TransicionRequest):
+    """Ejecuta una transición manual de estado."""
+    from src.integracion.maquina_estados import EstadoAlerta
+    
+    alerta = fsm_alertas.obtener_alerta(alerta_id)
+    if not alerta:
+        raise HTTPException(status_code=404, detail=f"Alerta {alerta_id} no encontrada")
+    
+    # Mapeo de eventos a estados
+    estado_nuevo_map = {
+        "resolver": EstadoAlerta.RESUELTO,
+        "empeorar_a_alerta": EstadoAlerta.ALERTA,
+        "empeorar_a_critico": EstadoAlerta.CRITICO,
+        "mejorar_a_normal": EstadoAlerta.NORMAL,
+        "mejorar_a_alerta": EstadoAlerta.ALERTA
+    }
+    
+    if transicion.evento not in estado_nuevo_map:
+        try:
+            estado_nuevo = EstadoAlerta(transicion.evento.upper())
+        except:
+            raise HTTPException(status_code=400, detail=f"Evento '{transicion.evento}' no reconocido")
+    else:
+        estado_nuevo = estado_nuevo_map[transicion.evento]
+    
+    exito, mensaje, alerta_actualizada = fsm_alertas.transicion(
+        alerta_id=alerta_id,
+        estado_nuevo=estado_nuevo,
+        evento=transicion.evento,
+        razon=transicion.razon
+    )
+    
+    if not exito:
+        raise HTTPException(status_code=400, detail=mensaje)
+    
+    return {
+        "success": True,
+        "mensaje": mensaje,
+        "transicion": {
+            "de": alerta.estado_actual.value,
+            "a": estado_nuevo.value,
+            "evento": transicion.evento,
+            "razon": transicion.razon
+        },
+        "alerta": {
+            "id": alerta_actualizada.id,
+            "estado_actual": alerta_actualizada.estado_actual.value,
+            "actualizado_en": alerta_actualizada.actualizado_en
+        }
+    }
+
+
+@app.get("/fsm/alertas/{alerta_id}/historial", tags=["FSM Alertas"])
+async def obtener_historial_fsm(alerta_id: str):
+    """Obtiene el historial completo de transiciones de una alerta."""
+    alerta = fsm_alertas.obtener_alerta(alerta_id)
+    
+    if not alerta:
+        raise HTTPException(status_code=404, detail=f"Alerta {alerta_id} no encontrada")
+    
+    return {
+        "alerta_id": alerta_id,
+        "estado_actual": alerta.estado_actual.value,
+        "total_transiciones": len(alerta.historial),
+        "historial": [
+            {
+                "timestamp": h.timestamp,
+                "estado_anterior": h.estado_anterior,
+                "estado_nuevo": h.estado_nuevo,
+                "evento": h.evento,
+                "razon": h.razon
+            }
+            for h in alerta.historial
+        ]
+    }
+
+
+@app.post("/fsm/alertas/evaluar_todas", tags=["FSM Alertas"])
+async def evaluar_todas_alertas_fsm():
+    """Evalúa todas las alertas activas y ejecuta transiciones automáticas."""
+    transiciones = fsm_alertas.evaluar_todas_las_alertas()
+    
+    return {
+        "evaluadas": len(fsm_alertas.alertas),
+        "transiciones_ejecutadas": len(transiciones),
+        "transiciones": transiciones,
+        "timestamp": datetime.now().isoformat()
+    }
+
+
+@app.get("/fsm/estadisticas", tags=["FSM Alertas"])
+async def obtener_estadisticas_fsm():
+    """Obtiene estadísticas generales del sistema FSM."""
+    stats = fsm_alertas.obtener_estadisticas()
+    
+    return {
+        **stats,
+        "timestamp": datetime.now().isoformat()
+    }
+
+
+@app.get("/fsm/diagrama", tags=["FSM Alertas"])
+async def obtener_diagrama_fsm():
+    """Retorna la información del diagrama FSM para visualización."""
+    return {
+        "estados": [
+            {"nombre": "NORMAL", "descripcion": "Sin problemas", "color": "#28a745"},
+            {"nombre": "ALERTA", "descripcion": "Requiere vigilancia", "color": "#ffc107"},
+            {"nombre": "CRÍTICO", "descripcion": "Peligro inminente", "color": "#dc3545"},
+            {"nombre": "RESUELTO", "descripcion": "Problema solucionado", "color": "#6c757d"}
+        ],
+        "transiciones": {
+            "NORMAL": ["ALERTA", "CRÍTICO"],
+            "ALERTA": ["NORMAL", "CRÍTICO", "RESUELTO"],
+            "CRÍTICO": ["ALERTA", "RESUELTO"],
+            "RESUELTO": []
+        },
+        "reglas_automaticas": {
+            "NORMAL_a_ALERTA": "fiabilidad < 0.7 OR precipitación > 50mm",
+            "NORMAL_a_CRÍTICO": "fiabilidad < 0.4 OR precipitación > 100mm",
+            "ALERTA_a_CRÍTICO": "fiabilidad < 0.5 OR precipitación > 100mm",
+            "ALERTA_a_NORMAL": "fiabilidad > 0.7 AND precipitación < 30mm",
+            "CRÍTICO_a_ALERTA": "fiabilidad > 0.5 AND precipitación < 80mm"
+        }
     }
 
 
